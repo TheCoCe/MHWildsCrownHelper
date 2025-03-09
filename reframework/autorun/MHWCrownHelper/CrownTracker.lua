@@ -81,14 +81,14 @@ function CrownTracker.DrawMonsterSizeTable()
         imgui.table_setup_column("G");
 
         if Settings.current.crownTracker.showCurrentRecords then
-            imgui.table_setup_column("Min");
-            imgui.table_setup_column("Max");
+            imgui.table_setup_column("Smallest");
+            imgui.table_setup_column("Largest");
         end
 
         if Settings.current.crownTracker.showSizeBorders then
-            imgui.table_setup_column("MB");
-            imgui.table_setup_column("SB");
-            imgui.table_setup_column("GB");
+            imgui.table_setup_column("Max Mini Size");
+            imgui.table_setup_column("Min Silver Size");
+            imgui.table_setup_column("Min Gold Size");
         end
 
         imgui.table_headers_row();
@@ -124,21 +124,21 @@ function CrownTracker.DrawMonsterSizeTable()
 
                 if Settings.current.crownTracker.showCurrentRecords then
                     imgui.table_next_column();
-                    imgui.text(string.format("%.0f", sizeDetails.minHuntedSize * 100));
+                    imgui.text(string.format("%.2f", (sizeDetails.minHuntedSize / 100) * sizeDetails.baseSize));
 
                     imgui.table_next_column();
-                    imgui.text(string.format("%.0f", sizeDetails.maxHuntedSize * 100));
+                    imgui.text(string.format("%.2f", (sizeDetails.maxHuntedSize / 100) * sizeDetails.baseSize));
                 end
 
                 if Settings.current.crownTracker.showSizeBorders then
                     imgui.table_next_column();
-                    imgui.text(string.format("%.0f", sizeDetails.smallBorder * 100));
+                    imgui.text(string.format("%.2f", (sizeDetails.smallBorder / 100) * sizeDetails.baseSize));
 
                     imgui.table_next_column();
-                    imgui.text(string.format("%.0f", sizeDetails.bigBorder * 100));
+                    imgui.text(string.format("%.2f", (sizeDetails.bigBorder / 100) * sizeDetails.baseSize));
 
                     imgui.table_next_column();
-                    imgui.text(string.format("%.0f", sizeDetails.kingBorder * 100));
+                    imgui.text(string.format("%.2f", (sizeDetails.kingBorder / 100) * sizeDetails.baseSize));
                 end
             end
 

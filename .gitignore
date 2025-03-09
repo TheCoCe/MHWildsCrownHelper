@@ -1,2 +1,3 @@
 # ignore currently unused dirs
 reframework/images/MHWCrownHelper/**
+.vscode
