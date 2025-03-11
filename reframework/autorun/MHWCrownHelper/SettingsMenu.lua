@@ -5,6 +5,7 @@ local CrownTracker          = require("MHWCrownHelper.CrownTracker");
 local Notifications         = require("MHWCrownHelper.Notifications")
 local Singletons            = require("MHWCrownHelper.Singletons")
 local Monsters              = require("MHWCrownHelper.Monsters")
+local Const                 = require("MHWCrownHelper.Const")
 
 SettingsMenu.windowPosition = Vector2f.new(400, 200);
 SettingsMenu.windowPivot    = Vector2f.new(0, 0);
@@ -88,6 +89,10 @@ function SettingsMenu.Draw()
             Settings.current.sizeDetails.sizeDetailsOffset.spacing, 0.1, 0, 0, "%.1f");
         settingsChanged = settingsChanged or changed;
 
+        local options = { [Const.Fonts.SIZES.TINY] = "Tiny", [Const.Fonts.SIZES.SMALL] = "Small", [Const.Fonts.SIZES.MEDIUM] = "Medium", [Const.Fonts.SIZES.LARGE] = "Large", [Const.Fonts.SIZES.HUGE] = "Huge" }
+        changed, Settings.current.text.size = imgui.combo("Font Size", Settings.current.text.size, options);
+        settingsChanged = settingsChanged or changed;
+
         imgui.tree_pop();
     end
 
@@ -121,8 +126,12 @@ function SettingsMenu.Draw()
         end
         settingsChanged = settingsChanged or changed;
 
+        local options = { [Const.Fonts.SIZES.TINY] = "Tiny", [Const.Fonts.SIZES.SMALL] = "Small", [Const.Fonts.SIZES.MEDIUM] = "Medium", [Const.Fonts.SIZES.LARGE] = "Large", [Const.Fonts.SIZES.HUGE] = "Huge" }
+        changed, Settings.current.text.ntfySize = imgui.combo("Font Size", Settings.current.text.ntfySize, options);
+        settingsChanged = settingsChanged or changed;
+
         if imgui.button("Show test notification") then
-            Notifications.AddNotification("Test");
+            Notifications.AddSizeRecordNotification(0, 1, 2, 1000, Const.CrownType.King, "TEST", 10);
         end
 
         imgui.tree_pop();

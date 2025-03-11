@@ -1,6 +1,7 @@
 local Settings             = {};
 local TableHelpers         = require("MHWCrownHelper.table_helpers");
 local Event                = require("MHWCrownHelper.Event")
+local Const                = require("MHWCrownHelper.Const")
 
 Settings.current           = nil;
 Settings.configFileName    = "MHWCrownHelper/Settings.json";
@@ -49,7 +50,8 @@ function Settings.Init()
         },
 
         text = {
-            textSize = 14,
+            size = Const.Fonts.SIZES.MEDIUM,
+            ntfySize = Const.Fonts.SIZES.MEDIUM
         }
     };
 end

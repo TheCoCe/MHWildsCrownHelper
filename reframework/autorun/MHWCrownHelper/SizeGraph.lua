@@ -191,10 +191,15 @@ local baseCtInfoHeight = 0.029167;  --  42
 -------------------------------------------------------------------
 
 local detailInfoSizeGraph = 100;
-local bgMarginX = 20;
-local bgMarginY = 10;
-local bgMarginYComp = 2;
-local baseSpacingY = 5;
+
+-- Base offsets
+local topOffset = 200 / 1440;
+local rightOffset = 10 / 1440;
+
+-- Item margins
+local bgMarginX = 10 / 1440;
+local bgMarginY = 2 / 1440;
+local baseSpacingY = 10 / 1440;
 
 ---Draws the monster details for a specific monster
 ---@param monster table The monster table
@@ -269,19 +274,16 @@ function SizeGraph.DrawMonsterDetails(monster, index)
             end
         end
     else
-        local width, height = Drawing.MeasureText(headerString);
-        local posx = (baseCtPadRight * w) + width;
-        -- TODO: use measured height instead and pass y start point to the next draw
-        local detailsHeight = 20; --height;
-        local posy = (baseCtPadTop * h) + 2 * (baseCtPadItemBot * h) + (baseCtInfoHeight * h) +
-            (detailsHeight * index) + ((baseSpacingY + Settings.current.sizeDetails.sizeDetailsOffset.spacing) * index);
+        local textWidth, textHeight = Drawing.MeasureText(headerString);
+        local posx = (rightOffset * w) + textWidth;
+        local posy = (topOffset * h) + (textHeight * index) + ((baseSpacingY * h + Settings.current.sizeDetails.sizeDetailsOffset.spacing) * index);
         posx, posy = Drawing.FromTopRight(posx, posy);
         posx = posx + Settings.current.sizeDetails.sizeDetailsOffset.x + widget.AnimData.offset.x;
         posy = posy + Settings.current.sizeDetails.sizeDetailsOffset.y + widget.AnimData.offset.y;
 
-        Drawing.DrawImage(Drawing.imageResources["sgbg"], posx - bgMarginX, posy - bgMarginYComp,
-            width + 2 * bgMarginX
-            , detailsHeight + 2 * bgMarginYComp, 0, 0);
+        Drawing.DrawImage(Drawing.imageResources["sgbg"], posx - bgMarginX * w, posy - bgMarginY * h,
+            textWidth + 2 * bgMarginX * w
+            , textHeight + 2 * bgMarginY * h, 0, 0);
         Drawing.DrawText(headerString, posx, posy, widget.AnimData.textColor, true, 1.5, 1.5,
             widget.AnimData.textShadowColor);
     end

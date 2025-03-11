@@ -1,5 +1,4 @@
 local Singletons = {};
-local Utils = require "MHWCrownHelper.Utils"
 
 Singletons.EnemyManager = nil;
 Singletons.GUIManager = nil;
@@ -27,7 +26,7 @@ end
 
 ---Tries to get a managed singleton.
 ---@param name string
----@return userdata|nil singleton
+---@return REManagedObject|nil singleton
 function Singletons.InitSingleton(name)
     local singleton = nil;
 
@@ -45,7 +44,7 @@ end
 
 ---Tries to get a native singleton.
 ---@param name string
----@return userdata|nil singleton
+---@return void_ptr|nil singleton
 function Singletons.InitSingletonNative(name)
     local singleton = nil;
 

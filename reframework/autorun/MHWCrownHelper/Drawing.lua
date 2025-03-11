@@ -4,6 +4,8 @@ local Settings            = require("MHWCrownHelper.Settings");
 local Animation           = require("MHWCrownHelper.Animation")
 local Utils               = require("MHWCrownHelper.Utils")
 local Const               = require("MHWCrownHelper.Const")
+local d2d = d2d;
+local draw = draw;
 
 -- window size
 local getMainViewMethod   = sdk.find_type_definition("via.SceneManager"):get_method("get_MainView");
@@ -12,12 +14,6 @@ local getWindowSizeMethod = sdk.find_type_definition("via.SceneView"):get_method
 -- aspect ratio
 local getMainCamMethod    = sdk.find_type_definition("app.CameraManager"):get_method("get_PrimaryCamera");
 local getAspectRatio      = sdk.find_type_definition("via.Camera"):get_method("get_AspectRatio");
-
--- font resources
---local imguiFont;
-local d2dFont;
-
-Drawing.fontResources     = {};
 
 -- image resources
 Drawing.imageResourcePath = "MHWCrownHelper/";
@@ -38,8 +34,21 @@ function Drawing.Init()
 
         Drawing.InitImage("sgbg", "SizeGraphBg.png");
 
-        d2dFont = d2d.Font.new("Consolas", Settings.current.text.textSize, false);
-        Drawing.InitFont("notification", "Consolas", 25, true, false);
+        -- init d2d fonts
+        Utils.InitFontD2D("regular", {
+            [Const.Fonts.SIZES.TINY] = 12,
+            [Const.Fonts.SIZES.SMALL] = 18,
+            [Const.Fonts.SIZES.MEDIUM] = 24,
+            [Const.Fonts.SIZES.LARGE] = 30,
+            [Const.Fonts.SIZES.HUGE] = 36
+        }, true, false);
+        Utils.InitFontD2D("notify", {
+            [Const.Fonts.SIZES.TINY] = 18,
+            [Const.Fonts.SIZES.SMALL] = 24,
+            [Const.Fonts.SIZES.MEDIUM] = 30,
+            [Const.Fonts.SIZES.LARGE] = 36,
+            [Const.Fonts.SIZES.HUGE] = 42
+        }, true, false);
     end
 end
 
@@ -129,16 +138,22 @@ function Drawing.DrawText(text, posx, posy, color, drawShadow, shadowOffsetX, sh
         return;
     end
 
+    local font = Utils.GetFontD2D("regular", Settings.current.text.size);
+    if font == nil then
+        Utils.logDebug("No font found for size " .. Settings.current.text.size);
+        return;
+    end
+
     if drawShadow then
         if d2d ~= nil then
-            d2d.text(d2dFont, text, posx + shadowOffsetX, posy + shadowOffsetY, shadowColor);
+            d2d.text(font, text, posx + shadowOffsetX, posy + shadowOffsetY, shadowColor);
         else
             draw.text(text, posx + shadowOffsetX, posy + shadowOffsetY, Drawing.ARGBtoABGR(shadowColor));
         end
     end
 
     if d2d ~= nil then
-        d2d.text(d2dFont, text, posx, posy, color);
+        d2d.text(font, text, posx, posy, color);
     else
         draw.text(text, posx, posy, Drawing.ARGBtoABGR(color));
     end
@@ -157,7 +172,13 @@ end
 ---@param shadowOffsetY number|nil
 ---@param shadowColor integer|nil
 function Drawing.DrawTextFont(text, font, posx, posy, color, drawShadow, shadowOffsetX, shadowOffsetY, shadowColor)
-    if text == nil or font == nil then
+    if text == nil then
+        return;
+    end
+
+    if font == nil then font = Utils.GetFontD2D("regular", Settings.current.text.size); end
+    if font == nil then
+        Utils.logDebug("No font found for size " .. Settings.current.text.size);
         return;
     end
 
@@ -182,8 +203,9 @@ end
 ---@param text string
 ---@return number
 function Drawing.MeasureText(text)
-    if d2dFont then
-        return d2dFont:measure(text);
+    local font = Utils.GetFontD2D("regular", Settings.current.text.size);
+    if font then
+        return font:measure(text);
     end
 
     return 0;
@@ -193,9 +215,10 @@ end
 
 ---Measures the text in the current drawing font
 ---@param text string
----@param font userdata
+---@param font any|nil
 ---@return number
 function Drawing.MeasureTextWithFont(text, font)
+    if font == nil then font = Utils.GetFontD2D("regular", Settings.current.text.size); end
     if font then
         return font:measure(text);
     end

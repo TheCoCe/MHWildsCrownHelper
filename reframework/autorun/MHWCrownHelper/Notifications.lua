@@ -159,7 +159,7 @@ function NotificationWidget.Draw(s, posx, posy)
         (1.0 - 0.0) + 0.0;
     local msg = string.sub(s.message, 1, math.floor(string.len(s.message) * norm));
 
-    Drawing.DrawTextFont(msg, Drawing.fontResources["notification"], left + iconPadding + s.iconSize.x + textPaddingLeft,
+    Drawing.DrawTextFont(msg, Utils.GetFontD2D("notify", Settings.current.text.ntfySize), left + iconPadding + s.iconSize.x + textPaddingLeft,
         posy - s.messageSize.height * 0.5, s.AnimData.textColor, true, 2, 2, s.AnimData.textShadowColor);
 
     --[[
@@ -198,25 +198,25 @@ end
 function NotificationWidget.New(message, icon, iconSizeX, iconSizeY)
     iconSizeX = iconSizeX or 64;
     iconSizeY = iconSizeY or 64;
-
+    
     local bgS = Drawing.imageResources["nbgs"];
     local bgF = Drawing.imageResources["nbgf"];
     local bgE = Drawing.imageResources["nbge"];
-
+    
     local bgSW, bgSH = bgS:size();
     local bgFW, bgFH = bgF:size();
     local bgEW, bgEH = bgE:size();
-
+    
     local minBgSize = bgSW + bgFW + bgEW;
-
+    
     local contentWidth = 0;
     local iconWidth = 0;
     if icon then
         iconWidth = iconPadding + iconSizeX;
     end
     contentWidth = contentWidth + iconWidth;
-
-    local msgW, msgH = Drawing.MeasureTextWithFont(message, Drawing.fontResources["notification"]);
+    
+    local msgW, msgH = Drawing.MeasureTextWithFont(message, Utils.GetFontD2D("notify", Settings.current.text.ntfySize));
     contentWidth = contentWidth + textPaddingLeft + msgW + textPaddingRight;
 
     local table = {

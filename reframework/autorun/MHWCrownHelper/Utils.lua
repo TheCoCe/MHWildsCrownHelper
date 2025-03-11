@@ -1,3 +1,5 @@
+local Singletons = require "MHWCrownHelper.Singletons"
+local Const      = require "MHWCrownHelper.Const"
 local Utils = {};
 
 local nameString = "[MHWCrownHelper]: ";
@@ -115,6 +117,7 @@ function Utils.IsModuleAvailable(name)
     end
 end
 
+--[[ Hooks ]] --
 -------------------------------------------------------------------
 
 function Utils.Hook(type, method, pre_function, post_function)
@@ -146,6 +149,75 @@ function Utils.Hook(type, method, pre_function, post_function)
     )
 end
 
+--[[ Language ]] --
 -------------------------------------------------------------------
+
+function Utils.GetLanguage()
+    if not Singletons.GUIManager then
+        return Const.Language.English;
+    end
+
+    return Singletons.GUIManager:getSystemLanguageToApp();
+end
+
+-------------------------------------------------------------------
+
+local cachedImguiFonts = {};
+
+--- Load an imgui font
+---@param fontSize number|nil
+function Utils.InitFontImgui(key, fontSize)
+    if fontSize == nil then fontSize = 14 end;
+    local language = Utils.GetLanguage();
+    local fontConfig = Const.Fonts[language];
+    if fontConfig == nil then
+        fontConfig = Const.Fonts.Default;
+    end
+
+    cachedImguiFonts[key] = imgui.load_font(fontConfig.FONT_NAME, fontSize, fontConfig.GLYPH_RANGES);
+    return cachedImguiFonts[key];
+end
+
+-------------------------------------------------------------------
+
+function Utils.GetFontImgui(key)
+    return cachedImguiFonts[key];
+end
+
+-------------------------------------------------------------------
+
+local cachedD2DFonts = {};
+
+--- Load a d2d font. You can only call this in the d2d register function!
+---@param fontSizes table<any, number>
+---@param bold boolean|nil
+---@param italic boolean|nil
+function Utils.InitFontD2D(key, fontSizes, bold, italic)
+    local language = Utils.GetLanguage();
+    local fontInfo = Const.Fonts[language];
+    if not fontInfo then
+        fontInfo = Const.Fonts.Default;
+    end
+
+    local fonts = {};
+
+    for _, v in pairs(Const.Fonts.SIZES) do
+        local size = fontSizes[v];
+        if not size then
+            size = Const.Fonts.DEFAULT_FONT_SIZE;
+        end
+
+        fonts[v] = d2d.Font.new(fontInfo.FONT_FAMILY, math.ceil(size), bold, italic);
+    end
+
+    cachedD2DFonts[key] = fonts;
+end
+
+-------------------------------------------------------------------
+
+function Utils.GetFontD2D(key, size)
+    local font = cachedD2DFonts[key];
+    return font[size];
+end
 
 return Utils;
