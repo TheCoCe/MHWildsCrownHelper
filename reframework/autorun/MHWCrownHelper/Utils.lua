@@ -165,23 +165,37 @@ end
 local cachedImguiFonts = {};
 
 --- Load an imgui font
----@param fontSize number|nil
-function Utils.InitFontImgui(key, fontSize)
-    if fontSize == nil then fontSize = 14 end;
+---@param fontSizes table<any, number>
+function Utils.InitFontImgui(key, fontSizes)
     local language = Utils.GetLanguage();
-    local fontConfig = Const.Fonts[language];
-    if fontConfig == nil then
-        fontConfig = Const.Fonts.Default;
+    local fontInfo = Const.Fonts[language];
+    if not fontInfo then
+        fontInfo = Const.Fonts.Default;
     end
 
-    cachedImguiFonts[key] = imgui.load_font(fontConfig.FONT_NAME, fontSize, fontConfig.GLYPH_RANGES);
-    return cachedImguiFonts[key];
+    local fonts = {};
+
+    for _, v in pairs(Const.Fonts.SIZES) do
+        local size = fontSizes[v];
+        if not size then
+            size = Const.Fonts.DEFAULT_FONT_SIZE;
+        end
+
+        fonts[v] = imgui.load_font(fontInfo.FONT_NAME, size, fontInfo.GLYPH_RANGES);
+    end
+
+    cachedImguiFonts[key] = fonts;
 end
 
 -------------------------------------------------------------------
 
-function Utils.GetFontImgui(key)
-    return cachedImguiFonts[key];
+function Utils.GetFontImgui(key, size)
+    local font = cachedImguiFonts[key];
+    if font ~= nil then
+        return font[size];
+    end
+
+    return nil;
 end
 
 -------------------------------------------------------------------
@@ -217,7 +231,11 @@ end
 
 function Utils.GetFontD2D(key, size)
     local font = cachedD2DFonts[key];
-    return font[size];
+    if font ~= nil then
+        return font[size];
+    end
+
+    return nil;
 end
 
 return Utils;

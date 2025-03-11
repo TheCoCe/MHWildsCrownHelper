@@ -31,6 +31,7 @@ function CrownHelper.HandleInit()
         -- Init modules that require ingame
         Monsters.InitModule();
         SizeGraph.InitModule();
+        CrownTracker.InitModule();
         CrownHelper.isInitialized = true;
         Utils.logInfo("All modules initialized");
     end

@@ -22,10 +22,13 @@ Drawing.imageResources    = {};
 ---Initializes the requierd resources for drawing
 function Drawing.Init()
     if d2d ~= nil then
-        Drawing.InitImage(Const.CrownIcons[Const.CrownType.Small], "MiniCrown.png");
-        Drawing.InitImage(Const.CrownIcons[Const.CrownType.Big], "BigCrown.png");
-        Drawing.InitImage(Const.CrownIcons[Const.CrownType.King], "KingCrown.png");
-        Drawing.InitImage("monster", "monster1.png");
+        Drawing.InitImage(Const.CrownType.None, "monster1.png");
+        Drawing.InitImage(Const.CrownType.Small, "MiniCrown.png");
+        Drawing.InitImage(Const.CrownType.Big, "BigCrown.png");
+        Drawing.InitImage(Const.CrownType.King, "KingCrown.png");
+        Drawing.InitImage("small_gs", "MiniCrown_gs.png");
+        Drawing.InitImage("big_gs", "BigCrown_gs.png");
+        Drawing.InitImage("king_gs", "KingCrown_gs.png");
         Drawing.InitImage("book", "Book.png");
 
         Drawing.InitImage("nbgs", "NotificationBgS.png");
@@ -56,25 +59,11 @@ end
 
 ---Initializes a image resource from the given image name to be retrieved later using the given key.
 ---The image directroy will automatically be prepended to the image path.
----@param key string
+---@param key any
 ---@param image string
 function Drawing.InitImage(key, image)
     if d2d ~= nil then
         Drawing.imageResources[key] = d2d.Image.new(Drawing.imageResourcePath .. image);
-    end
-end
-
--------------------------------------------------------------------
-
----comment
----@param key string
----@param font string
----@param size integer
----@param bold boolean
----@param italic boolean
-function Drawing.InitFont(key, font, size, bold, italic)
-    if d2d ~= nil then
-        Drawing.fontResources[key] = d2d.Font.new(font, size, bold, italic);
     end
 end
 
@@ -93,7 +82,12 @@ end
 ---@param posy number The y center position.
 ---@param radius number The circles radius.
 ---@param color number As hex e.g. 0xFFFFFFFF.
-function Drawing.DrawCircle(posx, posy, radius, color)
+---@param offset Vector2f|nil
+function Drawing.DrawCircle(posx, posy, radius, color, offset)
+    if offset ~= nil then
+        posx = posx + offset.x;
+        posy = posy + offset.y;
+    end
     if d2d ~= nil then
         d2d.fill_circle(posx, posy, radius, color);
     else
@@ -111,10 +105,15 @@ end
 ---@param color number
 ---@param pivotx number
 ---@param pivoty number
-function Drawing.DrawRect(posx, posy, sizex, sizey, color, pivotx, pivoty)
+---@param offset Vector2f|nil
+function Drawing.DrawRect(posx, posy, sizex, sizey, color, pivotx, pivoty, offset)
     pivotx = pivotx or 0;
     pivoty = pivoty or 0;
 
+    if offset ~= nil then
+        posx = posx + offset.x;
+        posy = posy + offset.y;
+    end
     if d2d ~= nil then
         d2d.fill_rect(posx - sizex * pivotx, posy - sizey * pivoty, sizex, sizey, color);
     else
@@ -133,7 +132,8 @@ end
 ---@param shadowOffsetX number|nil
 ---@param shadowOffsetY number|nil
 ---@param shadowColor integer|nil
-function Drawing.DrawText(text, posx, posy, color, drawShadow, shadowOffsetX, shadowOffsetY, shadowColor)
+---@param offset Vector2f|nil
+function Drawing.DrawText(text, posx, posy, color, drawShadow, shadowOffsetX, shadowOffsetY, shadowColor, offset)
     if text == nil then
         return;
     end
@@ -142,6 +142,11 @@ function Drawing.DrawText(text, posx, posy, color, drawShadow, shadowOffsetX, sh
     if font == nil then
         Utils.logDebug("No font found for size " .. Settings.current.text.size);
         return;
+    end
+
+    if offset ~= nil then
+        posx = posx + offset.x;
+        posy = posy + offset.y;
     end
 
     if drawShadow then
@@ -171,6 +176,7 @@ end
 ---@param shadowOffsetX number|nil
 ---@param shadowOffsetY number|nil
 ---@param shadowColor integer|nil
+---@param offset Vector2f|nil
 function Drawing.DrawTextFont(text, font, posx, posy, color, drawShadow, shadowOffsetX, shadowOffsetY, shadowColor)
     if text == nil then
         return;
@@ -236,7 +242,8 @@ end
 ---@param sizey number|nil
 ---@param pivotx number|nil
 ---@param pivoty number|nil
-function Drawing.DrawImage(image, posx, posy, sizex, sizey, pivotx, pivoty)
+---@param offset Vector2f|nil
+function Drawing.DrawImage(image, posx, posy, sizex, sizey, pivotx, pivoty, offset)
     if d2d == nil or image == nil then
         return;
     end
@@ -247,6 +254,11 @@ function Drawing.DrawImage(image, posx, posy, sizex, sizey, pivotx, pivoty)
     local imgWidth, imgHeight = image:size();
     sizex = sizex or imgWidth;
     sizey = sizey or imgHeight;
+
+    if offset ~= nil then
+        posx = posx + offset.x;
+        posy = posy + offset.y;
+    end
 
     posx = posx - pivotx * sizex;
     posy = posy - pivoty * sizey

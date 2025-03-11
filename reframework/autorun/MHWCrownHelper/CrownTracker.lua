@@ -1,9 +1,9 @@
 local CrownTracker             = {};
 local Settings                 = require("MHWCrownHelper.Settings");
 local Monsters                 = require("MHWCrownHelper.Monsters");
-local table_helpers            = require("MHWCrownHelper.table_helpers")
-local Drawing                  = require("MHWCrownHelper.Drawing")
-local Utils                    = require("MHWCrownHelper.Utils")
+local Drawing                  = require("MHWCrownHelper.Drawing");
+local Utils                    = require("MHWCrownHelper.Utils");
+local Const                    = require("MHWCrownHelper.Const");
 
 CrownTracker.crownTableVisible = true;
 
@@ -46,8 +46,14 @@ end
 
 -------------------------------------------------------------------
 
+function CrownTracker.InitModule()
+end
+
+-------------------------------------------------------------------
+
 ---Draws the crown tracker window
 function CrownTracker.DrawCrownTracker()
+    
     if Settings.current.crownTracker.showCrownTracker and CrownTracker.crownTableVisible then
         local flags = GetWindowFlags();
         imgui.set_next_window_size(GetDefaultWindowSize(), flags);
@@ -59,6 +65,7 @@ function CrownTracker.DrawCrownTracker()
             CrownTracker.crownTableVisible = false;
         end
     end
+
 end
 
 -------------------------------------------------------------------
@@ -72,79 +79,78 @@ function CrownTracker.DrawMonsterSizeTable()
     if Settings.current.crownTracker.showCurrentRecords then
         tableSize = tableSize + 2;
     end
-
-
+    
     if imgui.begin_table("Monster Crown Tracker", tableSize, tableFlags) then
         imgui.table_setup_column("Monster");
         imgui.table_setup_column("M");
         imgui.table_setup_column("S");
         imgui.table_setup_column("G");
-
+        
         if Settings.current.crownTracker.showCurrentRecords then
             imgui.table_setup_column("Smallest");
             imgui.table_setup_column("Largest");
         end
-
+        
         if Settings.current.crownTracker.showSizeBorders then
             imgui.table_setup_column("Max Mini Size");
             imgui.table_setup_column("Min Silver Size");
             imgui.table_setup_column("Min Gold Size");
         end
-
+        
         imgui.table_headers_row();
-
+        
         for _, v in pairs(Monsters.monsterDefinitions) do
             if not v.isBoss then goto continue end;
             local sizeDetails = Monsters.GetSizeInfoForEnemyType(v.emType);
-
+            
             if sizeDetails ~= nil then
                 if not sizeDetails.crownEnabled or (Settings.current.crownTracker.hideComplete and sizeDetails.smallCrownObtained and
-                        sizeDetails.bigCrownObtained and sizeDetails.kingCrownObtained) then
+                sizeDetails.bigCrownObtained and sizeDetails.kingCrownObtained) then
                     goto continue;
                 end
-
+                
                 imgui.table_next_row();
                 imgui.table_next_column();
                 imgui.text(v.name);
-
+                
                 imgui.table_next_column();
                 if sizeDetails.smallCrownObtained then
                     imgui.text("X");
                 end
-
+                
                 imgui.table_next_column();
                 if sizeDetails.bigCrownObtained then
                     imgui.text("X");
                 end
-
+                
                 imgui.table_next_column();
                 if sizeDetails.kingCrownObtained then
                     imgui.text("X");
                 end
-
+                
                 if Settings.current.crownTracker.showCurrentRecords then
                     imgui.table_next_column();
                     imgui.text(string.format("%.2f", (sizeDetails.minHuntedSize / 100) * sizeDetails.baseSize));
-
+                    
                     imgui.table_next_column();
                     imgui.text(string.format("%.2f", (sizeDetails.maxHuntedSize / 100) * sizeDetails.baseSize));
                 end
-
+                
                 if Settings.current.crownTracker.showSizeBorders then
                     imgui.table_next_column();
                     imgui.text(string.format("%.2f", (sizeDetails.smallBorder / 100) * sizeDetails.baseSize));
-
+                    
                     imgui.table_next_column();
                     imgui.text(string.format("%.2f", (sizeDetails.bigBorder / 100) * sizeDetails.baseSize));
-
+                    
                     imgui.table_next_column();
                     imgui.text(string.format("%.2f", (sizeDetails.kingBorder / 100) * sizeDetails.baseSize));
                 end
             end
-
+            
             ::continue::
         end
-
+        
         imgui.end_table();
     end
 end
