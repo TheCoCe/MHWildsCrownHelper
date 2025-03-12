@@ -29,6 +29,12 @@ Settings.NotificationType  = {
     Legacy = 2
 }
 
+Settings.CrownTrackerMode  = {
+    Disabled = 0,
+    ShowWithREFUI = 1,
+    ShowAlways = 2,
+}
+
 -------------------------------------------------------------------
 
 ---Initializes the default settings
@@ -63,7 +69,8 @@ function Settings.Init()
             showCrownTracker = true,
             hideComplete = true,
             showSizeBorders = false,
-            showCurrentRecords = false
+            showCurrentRecords = false,
+            crownTrackerMode = Settings.CrownTrackerMode.ShowWithREFUI,
         },
 
         text = {

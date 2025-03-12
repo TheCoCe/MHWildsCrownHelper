@@ -162,8 +162,13 @@ function SettingsMenu.Draw()
             end
         end
 
-        changed, Settings.current.crownTracker.showCrownTracker = imgui.checkbox("Show crown tracker",
-            Settings.current.crownTracker.showCrownTracker);
+        local crownTrackerTypes = {
+            [Settings.CrownTrackerMode.Disabled] = "Disabled",
+            [Settings.CrownTrackerMode.ShowWithREFUI] = "Show with REFramework UI",
+            [Settings.CrownTrackerMode.ShowAlways] = "Always show"
+        }
+        changed, Settings.current.crownTracker.crownTrackerMode = imgui.combo("Crown Tracker Mode",
+            Settings.current.crownTracker.crownTrackerMode, crownTrackerTypes);
         settingsChanged = settingsChanged or changed;
 
         imgui.new_line();
