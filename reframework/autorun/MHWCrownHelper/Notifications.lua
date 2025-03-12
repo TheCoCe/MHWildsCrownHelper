@@ -1,16 +1,45 @@
 local Notifications       = {};
 local NotificationWidget  = {};
 
-local Animation           = require("MHWCrownHelper.Animation")
-local Drawing             = require("MHWCrownHelper.Drawing")
-local Utils               = require("MHWCrownHelper.Utils")
-local Settings            = require("MHWCrownHelper.Settings")
-local Singletons          = require("MHWCrownHelper.Singletons")
-local Const               = require("MHWCrownHelper.Const")
+local Animation           = require("MHWCrownHelper.Animation");
+local Drawing             = require("MHWCrownHelper.Drawing");
+local Utils               = require("MHWCrownHelper.Utils");
+local Settings            = require("MHWCrownHelper.Settings");
+local Singletons          = require("MHWCrownHelper.Singletons");
+local Const               = require("MHWCrownHelper.Const");
+local Monsters            = require("MHWCrownHelper.Monsters");
 
 local firstUpdate         = true;
 local NotificationQueue   = {};
 local CurrentNotification = nil;
+
+-------------------------------------------------------------------
+
+function OnMonsterAdded(monster)
+    if Settings.current.notifications.notificationType == Settings.NotificationType.Disabled then return; end;
+    if monster == nil then return; end;
+    if monster.isNormal or monster.isDead then return; end;
+    local sizeInfo = Monsters.GetSizeInfoForEnemyType(monster.emId);
+    if sizeInfo == nil then return; end;
+    local isNewRecord = monster.size < sizeInfo.minHuntedSize or monster.size > sizeInfo.maxHuntedSize;
+    if Settings.current.notifications.notificationMode >= Settings.ShowMonstersMode.HideObtained then
+        if (monster.isSmall and sizeInfo.smallCrownObtained) or
+            (monster.isBig and sizeInfo.bigCrownObtained) or
+            (monster.isKing and sizeInfo.kingCrownObtained) then
+            if Settings.current.notifications.notificationMode == Settings.ShowMonstersMode.ShowNewRecords then
+                if not isNewRecord then
+                    return;
+                end
+            else
+                return;
+            end
+        end
+    end
+
+    Notifications.AddSizeRecordNotification(monster.emId, monster.roleId, monster.legendaryId,
+        math.floor(monster.size * sizeInfo.baseSize), monster.crownType, Monsters.GetEnemyName(monster.emId),
+        monster.area);
+end
 
 -------------------------------------------------------------------
 
@@ -49,10 +78,10 @@ end
 -------------------------------------------------------------------
 
 function Notifications.AddSizeRecordNotification(emId, roleId, legendaryId, size, crownType, monsterName, area)
-    if Settings.current.notifications.useLegacyNotifications then
+    if Settings.current.notifications.notificationType == Settings.NotificationType.Legacy then
         local crownString = Const.CrownNames[crownType] ..
             " Crown " .. monsterName .. " spotted!";
-        Notifications.AddNotification(crownString, Drawing.imageResources[Const.CrownIcons[crownType]]);
+        Notifications.AddNotification(crownString, Drawing.imageResources[crownType]);
     else
         local systemMessage = "Spotted ";
         if crownType > 0 then
@@ -159,7 +188,8 @@ function NotificationWidget.Draw(s, posx, posy)
         (1.0 - 0.0) + 0.0;
     local msg = string.sub(s.message, 1, math.floor(string.len(s.message) * norm));
 
-    Drawing.DrawTextFont(msg, Utils.GetFontD2D("notify", Settings.current.text.ntfySize), left + iconPadding + s.iconSize.x + textPaddingLeft,
+    Drawing.DrawTextFont(msg, Utils.GetFontD2D("notify", Settings.current.text.ntfySize),
+        left + iconPadding + s.iconSize.x + textPaddingLeft,
         posy - s.messageSize.height * 0.5, s.AnimData.textColor, true, 2, 2, s.AnimData.textShadowColor);
 
     --[[
@@ -198,24 +228,24 @@ end
 function NotificationWidget.New(message, icon, iconSizeX, iconSizeY)
     iconSizeX = iconSizeX or 64;
     iconSizeY = iconSizeY or 64;
-    
+
     local bgS = Drawing.imageResources["nbgs"];
     local bgF = Drawing.imageResources["nbgf"];
     local bgE = Drawing.imageResources["nbge"];
-    
+
     local bgSW, bgSH = bgS:size();
     local bgFW, bgFH = bgF:size();
     local bgEW, bgEH = bgE:size();
-    
+
     local minBgSize = bgSW + bgFW + bgEW;
-    
+
     local contentWidth = 0;
     local iconWidth = 0;
     if icon then
         iconWidth = iconPadding + iconSizeX;
     end
     contentWidth = contentWidth + iconWidth;
-    
+
     local msgW, msgH = Drawing.MeasureTextWithFont(message, Utils.GetFontD2D("notify", Settings.current.text.ntfySize));
     contentWidth = contentWidth + textPaddingLeft + msgW + textPaddingRight;
 
@@ -255,5 +285,8 @@ end
 
 -------------------------------------------------------------------
 
+function Notifications.InitModule()
+    Monsters.onMonsterAdded:add(OnMonsterAdded);
+end
 
 return Notifications;

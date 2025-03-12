@@ -32,6 +32,7 @@ function CrownHelper.HandleInit()
         Monsters.InitModule();
         SizeGraph.InitModule();
         CrownTracker.InitModule();
+        Notifications.InitModule();
         CrownHelper.isInitialized = true;
         Utils.logInfo("All modules initialized");
     end
@@ -59,8 +60,6 @@ function CrownHelper.OnFrame()
             Monsters.IterateMonsters(Drawing.DrawMonsterDetails);
         end
     end
-
-    CrownHelper.DrawSettingsMenu();
 end
 
 -------------------------------------------------------------------
@@ -89,22 +88,10 @@ end
 -- init stuff
 
 re.on_draw_ui(function()
-    if imgui.button("MHR Crown Helper") then
-        SettingsMenu.isOpened = not SettingsMenu.isOpened;
-    end
-end)
-
--------------------------------------------------------------------
-
-function CrownHelper.DrawSettingsMenu()
-    if not reframework:is_drawing_ui() then
-        SettingsMenu.isOpened = false;
-    end
-
-    if SettingsMenu.isOpened then
+    if imgui.collapsing_header("MHW Crown Helper") then
         pcall(SettingsMenu.Draw);
     end
-end
+end)
 
 -------------------------------------------------------------------
 

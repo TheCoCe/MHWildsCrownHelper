@@ -2,11 +2,7 @@ local Monsters                   = {};
 local Singletons                 = require("MHWCrownHelper.Singletons");
 local Quests                     = require("MHWCrownHelper.Quests");
 local Utils                      = require("MHWCrownHelper.Utils");
-local table_helpers              = require("MHWCrownHelper.table_helpers")
 local Event                      = require("MHWCrownHelper.Event")
-local Notifications              = require("MHWCrownHelper.Notifications")
-local Drawing                    = require("MHWCrownHelper.Drawing")
-local Settings                   = require("MHWCrownHelper.Settings")
 local Const                      = require("MHWCrownHelper.Const")
 
 ---@class EmID
@@ -186,22 +182,15 @@ function Monsters.NewMonster(ctx)
             monster.isKing = crownType == 3;
             monster.isDead = isDead;
             monster.area = area;
-        end
-
-        if (monster.isSmall or (monster.isBig and not Settings.current.notifications.ignoreSilverCrowns) or monster.isKing) and
-            (sizeInfo.crownNeeded or not Settings.current.notifications.ignoreObtainedCrowns) and not monster.isDead then
-            Notifications.AddSizeRecordNotification(monster.emId, ctx:get_RoleID(), ctx:get_LegendaryID(),
-                math.floor(monster.size * sizeInfo.baseSize),
-                monster.crownType,
-                Monsters.GetEnemyName(monster.emId), monster.area);
+            monster.roleId = ctx:get_RoleID();
+            monster.legendaryId = ctx:get_LegendaryID();
         end
 
         Utils.logDebug("Found " .. Monsters.GetEnemyName(monster.emId) .. " in area " .. tostring(monster.area))
     end
 
-    local sizeString = (monster.isSmall and "[small]" or (monster.isKing and "[king]" or (monster.isBig and "[big]" or "")));
     Utils.logDebug("registered '" ..
-        enemyName .. "' \tSize: '" .. string.format("%.2f", monster.size) .. "' " .. sizeString);
+        enemyName .. "' \tSize: '" .. string.format("%.2f", monster.size) .. "' " .. Const.CrownNames[monster.crownType]);
 
     if Monsters.monsters[ctx] == nil then
         Monsters.monsters[ctx] = monster;

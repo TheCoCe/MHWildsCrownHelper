@@ -167,7 +167,7 @@ function SizeGraph.Update(deltaTime)
         end
     end
 
-    if Settings.current.sizeDetails.showSizeDetails then
+    if Settings.current.sizeDetails.drawMode ~= Settings.DrawMode.Disabled then
         if ShouldDraw then
             SizeGraph.DrawMonsterList();
         end
@@ -175,8 +175,6 @@ function SizeGraph.Update(deltaTime)
 end
 
 -------------------------------------------------------------------
-
-local detailInfoSizeGraph = 100;
 
 -- Base offsets
 local topOffset = 200 / 1440;
@@ -194,28 +192,33 @@ function SizeGraph.DrawMonsterList()
 
     local posy = topOffset * h + Settings.current.sizeDetails.sizeDetailsOffset.y;
     for monster, widget in pairs(SizeGraphWidgets) do
-        -- Skip drawing normal size monsters if the setting is turned off
-        if not Settings.current.sizeDetails.drawSizeInfoForNoCrown and monster.isNormal then goto continue; end;
+        -- Skip normal size monsters in crown only modes
+        if Settings.current.sizeDetails.showMonsterMode >= Settings.ShowMonstersMode.CrownsOnly and monster.isNormal then goto continue; end;
 
         local sizeInfo = Monsters.GetSizeInfoForEnemyType(monster.emId);
         if sizeInfo == nil then goto continue; end;
-        -- Skip drawing for obtained (if active)
-        if Settings.current.sizeDetails.hideObtained and (
-                (monster.isSmall and sizeInfo.smallCrownObtained) or -- small crown obtained
-                (monster.isBig and sizeInfo.bigCrownObtained) or     -- big crown obtained
-                (monster.isKing and sizeInfo.kingCrownObtained)      -- king crown obtained
-            ) then
-            return false;
+
+        local isNewRecord = monster.size < sizeInfo.minHuntedSize or monster.size > sizeInfo.maxHuntedSize;
+
+        if Settings.current.sizeDetails.showMonsterMode >= Settings.ShowMonstersMode.HideObtained then
+            if (monster.isSmall and sizeInfo.smallCrownObtained) or
+                (monster.isBig and sizeInfo.bigCrownObtained) or
+                (monster.isKing and sizeInfo.kingCrownObtained) then
+                if Settings.current.sizeDetails.showMonsterMode == Settings.ShowMonstersMode.ShowNewRecords then
+                    if not isNewRecord then
+                        goto continue;
+                    end
+                else
+                    goto continue;
+                end
+            end
         end
 
         local headerString = Monsters.GetEnemyName(monster.emId) .. " (" .. tostring(monster.area) .. ")";
-        if (sizeInfo and sizeInfo.crownNeeded) and Settings.current.sizeDetails.showHunterRecordIcons and monster.crownType ~= 0 then
-            headerString = headerString .. " 📙 ";
-        else
-            headerString = headerString .. " ";
-        end
+        headerString = headerString .. (isNewRecord and " 📙 " or " ");
 
-        posy = widget:draw(headerString, posy, monster.size, sizeInfo.smallBorder, sizeInfo.bigBorder, sizeInfo.kingBorder, sizeInfo.baseSize, monster.crownType);
+        posy = widget:draw(headerString, posy, monster.size, sizeInfo.smallBorder, sizeInfo.bigBorder,
+            sizeInfo.kingBorder, sizeInfo.baseSize, monster.crownType, isNewRecord);
         posy = posy + baseSpacingY * h + Settings.current.sizeDetails.sizeDetailsOffset.spacing;
 
         ::continue::
@@ -283,11 +286,12 @@ end
 -------------------------------------------------------------------
 
 function SizeGraphWidget.Draw(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder,
-                              baseSize, crownType)
-    if Settings.current.sizeDetails.showSizeGraph then
-        return SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder, baseSize, crownType);
+                              baseSize, crownType, isNewRecord)
+    if Settings.current.sizeDetails.drawMode == Settings.DrawMode.Simple then
+        return SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize, isNewRecord);
     else
-        return SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize);
+        return SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder, baseSize,
+            crownType);
     end
 end
 
@@ -295,9 +299,9 @@ end
 
 local bgMarginX = 25 / 2560;
 local bgMarginY = 5 / 1440;
-local titleIconPadding = 5 /1440;
+local titleIconPadding = 2 / 2560;
 
-function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize)
+function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize, isNewRecord)
     local w, h = Drawing.GetWindowSize();
     local textWidth, textHeight = Drawing.MeasureText(title);
 
@@ -307,31 +311,44 @@ function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSiz
     local imageSize = textHeight * 1.75;
 
     local isCrown = crownType ~= Const.CrownType.None;
-    local imageWidth = (isCrown and ((2) * titleIconPadding + imageSize) or 0);
+    local crownImageWidth = (isCrown and (2 * titleIconPadding * w + imageSize) or 0);
 
-    local bgSizeX = textWidth + 2 * bgMarginX * w + imageWidth + sizeTextWidth;
+    local newRecordImageWidth = (isNewRecord and ((isCrown and 1 or 2) * titleIconPadding * w + imageSize) or 0);
+
+    local bgSizeX = textWidth + 2 * bgMarginX * w + crownImageWidth + newRecordImageWidth + sizeTextWidth;
     local bgSizeY = textHeight + 2 * bgMarginY * h;
-    local bgPosX = (rightOffset * w) + bgSizeX  + Settings.current.sizeDetails.sizeDetailsOffset.x;
+    local bgPosX = (rightOffset * w) + bgSizeX + Settings.current.sizeDetails.sizeDetailsOffset.x;
     local bgPosY = posy + s.AnimData.offset.y;
     bgPosX, bgPosY = Drawing.FromTopRight(bgPosX, bgPosY);
 
     Drawing.DrawImage(Drawing.imageResources["sgbg"], bgPosX, bgPosY, bgSizeX, bgSizeY, 0, 0, s.AnimData.offset);
 
-    local textPosX = (rightOffset * w) + textWidth + bgMarginX * w + imageWidth + sizeTextWidth + Settings.current.sizeDetails.sizeDetailsOffset.x;
+    local textPosX = (rightOffset * w) + textWidth + bgMarginX * w + crownImageWidth + newRecordImageWidth +
+    sizeTextWidth + Settings.current.sizeDetails.sizeDetailsOffset.x;
     local textPosY = posy + bgMarginY * h;
     textPosX, textPosY = Drawing.FromTopRight(textPosX, textPosY);
 
-    Drawing.DrawText(title, textPosX, textPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor, s.AnimData.offset);
+    Drawing.DrawText(title, textPosX, textPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor,
+        s.AnimData.offset);
 
     if isCrown then
         local image = Drawing.imageResources[crownType];
         if image ~= nil then
-            Drawing.DrawImage(image, textPosX + textWidth + titleIconPadding, textPosY + textHeight * 0.5, imageSize, imageSize, 0, 0.5, s.AnimData.offset);
+            Drawing.DrawImage(image, textPosX + textWidth + titleIconPadding * w, textPosY + textHeight * 0.5, imageSize,
+                imageSize, 0, 0.5, s.AnimData.offset);
+        end
+    end
+    if isNewRecord then
+        local image = Drawing.imageResources["book"];
+        if image ~= nil then
+            Drawing.DrawImage(image, textPosX + textWidth + (isCrown and 0 or titleIconPadding * w) + crownImageWidth,
+                textPosY + textHeight * 0.5, imageSize, imageSize, 0, 0.5, s.AnimData.offset);
         end
     end
 
     if Settings.current.sizeDetails.showActualSize then
-        Drawing.DrawText(sizeText, textPosX + textWidth + imageWidth, textPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor, s.AnimData.offset);
+        Drawing.DrawText(sizeText, textPosX + textWidth + crownImageWidth + newRecordImageWidth, textPosY,
+            s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor, s.AnimData.offset);
     end
 
     return posy + bgSizeY;
@@ -387,7 +404,8 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
     currentSizePosX, currentSizePosY = Drawing.FromTopRight(currentSizePosX, currentSizePosY);
 
     -- King size
-    local kingTextPosY = Settings.current.sizeDetails.showActualSize and (currentSizePosY + sizeY + sgTextMarginY * h) or currentSizePosY;
+    local kingTextPosY = Settings.current.sizeDetails.showActualSize and (currentSizePosY + sizeY + sgTextMarginY * h) or
+    currentSizePosY;
     kingTextPosX, kingTextPosY = Drawing.FromTopRight(kingTextPosX, kingTextPosY);;
 
     -- Size graph
@@ -408,37 +426,46 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
     -- Draw in correct order
     Drawing.DrawImage(Drawing.imageResources["sgbg"], bgPosX, posy, bgSizeX, bgSizeY, 0, 0, s.AnimData.offset);
 
-    Drawing.DrawText(title, titlePosX, titlePosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor, s.AnimData.offset);
+    Drawing.DrawText(title, titlePosX, titlePosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor,
+        s.AnimData.offset);
     if Settings.current.sizeDetails.showActualSize then
-        Drawing.DrawText(size, currentSizePosX, currentSizePosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor, s.AnimData.offset);
+        Drawing.DrawText(size, currentSizePosX, currentSizePosY, s.AnimData.textColor, true, 1.5, 1.5,
+            s.AnimData.textShadowColor, s.AnimData.offset);
     end
-    Drawing.DrawText(king, kingTextPosX, kingTextPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor, s.AnimData.offset);
-    
-    Drawing.DrawRect(sgMiniPosX, sgPosY, sgKingPosX - sgMiniPosX, sgLineThickness * h, s.AnimData.graphColor, 0, 0.5, s.AnimData.offset);
+    Drawing.DrawText(king, kingTextPosX, kingTextPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor,
+        s.AnimData.offset);
+
+    Drawing.DrawRect(sgMiniPosX, sgPosY, sgKingPosX - sgMiniPosX, sgLineThickness * h, s.AnimData.graphColor, 0, 0.5,
+        s.AnimData.offset);
     Drawing.DrawCircle(sgMiniPosX, sgPosY, sgMarkerRadius * h, s.AnimData.graphColor, s.AnimData.offset);
     Drawing.DrawCircle(sgKingPosX, sgPosY, sgMarkerRadius * h, s.AnimData.graphColor, s.AnimData.offset);
     Drawing.DrawCircle(sgBigPosX, sgPosY, sgMarkerRadius * h, s.AnimData.graphColor, s.AnimData.offset);
 
     local image = Drawing.imageResources["small_gs"];
     if image ~= nil then
-        Drawing.DrawImage(image, sgMiniPosX, sgPosY, s.AnimData.iconSize * 0.75, s.AnimData.iconSize * 0.75, 0.5, -0.1, s.AnimData.offset);
+        Drawing.DrawImage(image, sgMiniPosX, sgPosY, s.AnimData.iconSize * 0.75, s.AnimData.iconSize * 0.75, 0.5, -0.1,
+            s.AnimData.offset);
     end
 
     image = Drawing.imageResources["big_gs"];
     if image ~= nil then
-        Drawing.DrawImage(image, sgBigPosX, sgPosY, s.AnimData.iconSize * 0.75, s.AnimData.iconSize * 0.75, 0.5, -0.1, s.AnimData.offset);
+        Drawing.DrawImage(image, sgBigPosX, sgPosY, s.AnimData.iconSize * 0.75, s.AnimData.iconSize * 0.75, 0.5, -0.1,
+            s.AnimData.offset);
     end
 
     image = Drawing.imageResources["king_gs"];
     if image ~= nil then
-        Drawing.DrawImage(image, sgKingPosX, sgPosY, s.AnimData.iconSize * 0.75, s.AnimData.iconSize * 0.75, 0.5, -0.1, s.AnimData.offset);
+        Drawing.DrawImage(image, sgKingPosX, sgPosY, s.AnimData.iconSize * 0.75, s.AnimData.iconSize * 0.75, 0.5, -0.1,
+            s.AnimData.offset);
     end
 
-    Drawing.DrawText(mini, miniTextPosX, kingTextPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor, s.AnimData.offset);
+    Drawing.DrawText(mini, miniTextPosX, kingTextPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor,
+        s.AnimData.offset);
 
     image = Drawing.imageResources[crownType];
     if image ~= nil then
-        Drawing.DrawImage(image, sgMiniPosX + (sgKingPosX - sgMiniPosX) * normalizedSize, sgPosY, s.AnimData.iconSize, s.AnimData.iconSize, 0.5, 0.6, s.AnimData.offset);
+        Drawing.DrawImage(image, sgMiniPosX + (sgKingPosX - sgMiniPosX) * normalizedSize, sgPosY, s.AnimData.iconSize,
+            s.AnimData.iconSize, 0.5, 0.6, s.AnimData.offset);
     end
 
     return posy + (kingTextPosY - posy + sgBgMarginY * h + kingY);

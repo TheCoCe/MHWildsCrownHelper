@@ -10,16 +10,35 @@ Settings.onSettingsChanged = Event.New();
 
 -------------------------------------------------------------------
 
+Settings.DrawMode          = {
+    Disabled = 0,
+    Simple = 1,
+    SizeGraph = 2
+};
+
+Settings.ShowMonstersMode  = {
+    All = 0,
+    CrownsOnly = 1,
+    HideObtained = 2,
+    ShowNewRecords = 3
+};
+
+Settings.NotificationType  = {
+    Disabled = 0,
+    Enabled = 1,
+    Legacy = 2
+}
+
+-------------------------------------------------------------------
+
 ---Initializes the default settings
 function Settings.Init()
     Settings.default = {
         sizeDetails = {
-            showSizeDetails = true,
-            showHunterRecordIcons = true,
-            showSizeGraph = false,
-            drawSizeInfoForNoCrown = true,
-            hideObtained = true,
+            drawMode = Settings.DrawMode.Simple,
             showActualSize = true,
+            showMonsterMode = Settings.ShowMonstersMode.CrownsOnly,
+
             autoHide = false,
             autoHideAfter = 20,
 
@@ -27,19 +46,17 @@ function Settings.Init()
                 x = 0,
                 y = 0,
                 spacing = 0,
-            }
+            },
         },
 
         notifications = {
-            showNotifications = true,
-            useLegacyNotifications = false,
-            ignoreSilverCrowns = false,
-            ignoreObtainedCrowns = false,
+            notificationType = Settings.NotificationType.Enabled,
+            notificationMode = Settings.ShowMonstersMode.CrownsOnly,
             notificionDisplayTime = 5,
             notificationsOffset = {
                 x = 0,
                 y = 0,
-            }
+            },
         },
 
         crownTracker = {
