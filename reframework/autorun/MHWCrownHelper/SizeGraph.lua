@@ -291,7 +291,7 @@ function SizeGraphWidget.Draw(s, title, posy, monsterSize, smallBorder, bigBorde
         return SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize, isNewRecord);
     else
         return SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder, baseSize,
-            crownType);
+            crownType, isNewRecord);
     end
 end
 
@@ -324,7 +324,7 @@ function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSiz
     Drawing.DrawImage(Drawing.imageResources["sgbg"], bgPosX, bgPosY, bgSizeX, bgSizeY, 0, 0, s.AnimData.offset);
 
     local textPosX = (rightOffset * w) + textWidth + bgMarginX * w + crownImageWidth + newRecordImageWidth +
-    sizeTextWidth + Settings.current.sizeDetails.sizeDetailsOffset.x;
+        sizeTextWidth + Settings.current.sizeDetails.sizeDetailsOffset.x;
     local textPosY = posy + bgMarginY * h;
     textPosX, textPosY = Drawing.FromTopRight(textPosX, textPosY);
 
@@ -364,8 +364,10 @@ local sgMarkerRadius = 4 / 1440;
 
 local sgBgMarginY = 20 / 1440;
 
-function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder, baseSize, crownType)
+function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder, baseSize, crownType,
+                                 isNewRecord)
     local w, h = Drawing.GetWindowSize();
+    isNewRecord = true;
     -- draw |---------|-o--|
     local normalizedSize = (monsterSize - smallBorder) / (kingBorder - smallBorder);
     normalizedSize = math.min(math.max(normalizedSize, 0.0), 1.0);
@@ -394,8 +396,11 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
     local miniTextPosX = sgMiniPosX + sgTextMarginX * w + miniX;
 
     -- Title
+    local recordIconSize = titleY * 1.25;
+    local newRecordImageWidth = (isNewRecord and (titleIconPadding * w + recordIconSize) or 0);
+
     local titlePosY = posy + bgMarginY * h;
-    local titlePosX = math.max(miniTextPosX, titleX + bgMarginX * w + rightOffset * w);
+    local titlePosX = math.max(miniTextPosX, titleX + bgMarginX * w + rightOffset * w + newRecordImageWidth);
     titlePosX, titlePosY = Drawing.FromTopRight(titlePosX, titlePosY);
 
     -- Optional size
@@ -405,7 +410,7 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
 
     -- King size
     local kingTextPosY = Settings.current.sizeDetails.showActualSize and (currentSizePosY + sizeY + sgTextMarginY * h) or
-    currentSizePosY;
+        currentSizePosY;
     kingTextPosX, kingTextPosY = Drawing.FromTopRight(kingTextPosX, kingTextPosY);;
 
     -- Size graph
@@ -419,15 +424,26 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
     miniTextPosX, _ = Drawing.FromTopRight(miniTextPosX, 0);
 
     -- Background
-    local bgSizeX = 2 * bgMarginX * w + kingX + 2 * sgTextMarginX * w + baseGraphWidth * w + miniX;
+    local bgSizeX = w - titlePosX + bgMarginX * w;
     local bgSizeY = kingTextPosY - posy + sgBgMarginY * h + kingY;
     local bgPosX = titlePosX - bgMarginX * w;
 
     -- Draw in correct order
     Drawing.DrawImage(Drawing.imageResources["sgbg"], bgPosX, posy, bgSizeX, bgSizeY, 0, 0, s.AnimData.offset);
 
-    Drawing.DrawText(title, titlePosX, titlePosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor,
+    Drawing.DrawText(title, titlePosX, titlePosY, s.AnimData
+        .textColor, true, 1.5,
+        1.5, s.AnimData.textShadowColor,
         s.AnimData.offset);
+
+    if isNewRecord then
+        local image = Drawing.imageResources["book"];
+        if image ~= nil then
+            Drawing.DrawImage(image, titlePosX + titleX + titleIconPadding * w,
+                titlePosY + titleY * 0.5, newRecordImageWidth, newRecordImageWidth, 0, 0.5, s.AnimData.offset);
+        end
+    end
+
     if Settings.current.sizeDetails.showActualSize then
         Drawing.DrawText(size, currentSizePosX, currentSizePosY, s.AnimData.textColor, true, 1.5, 1.5,
             s.AnimData.textShadowColor, s.AnimData.offset);
