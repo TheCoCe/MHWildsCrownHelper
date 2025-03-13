@@ -215,7 +215,6 @@ function SizeGraph.DrawMonsterList()
         end
 
         local headerString = Monsters.GetEnemyName(monster.emId) .. " (" .. tostring(monster.area) .. ")";
-        headerString = headerString .. (isNewRecord and " 📙 " or " ");
 
         posy = widget:draw(headerString, posy, monster.size, sizeInfo.smallBorder, sizeInfo.bigBorder,
             sizeInfo.kingBorder, sizeInfo.baseSize, monster.crownType, isNewRecord);
