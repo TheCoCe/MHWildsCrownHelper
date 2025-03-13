@@ -2,8 +2,8 @@ local Monsters                   = {};
 local Singletons                 = require("MHWCrownHelper.Singletons");
 local Quests                     = require("MHWCrownHelper.Quests");
 local Utils                      = require("MHWCrownHelper.Utils");
-local Event                      = require("MHWCrownHelper.Event")
-local Const                      = require("MHWCrownHelper.Const")
+local Event                      = require("MHWCrownHelper.Event");
+local Const                      = require("MHWCrownHelper.Const");
 
 ---@class EmID
 ---@class EnemyCharacter
@@ -29,6 +29,11 @@ local GetSizeDataMethod          = sdk.find_type_definition("app.user_data.EmPar
 local ReportUtil                 = sdk.find_type_definition("app.EnemyReportUtil");
 local ReportUtilMinSize          = ReportUtil:get_method("getMinSize(app.EnemyDef.ID)");
 local ReportUtilMaxSize          = ReportUtil:get_method("getMaxSize(app.EnemyDef.ID)");
+
+local CocoonWaitTimeField        = sdk.find_type_definition("app.cEnemyContext"):get_field("CocoonWaitTime");
+
+local FindEnemyUniqueIndex       = sdk.find_type_definition("app.EnemyManager"):get_method(
+    "findEnemy_UniqueIndex(System.Int32)");
 
 -- EmIDs
 local ValidEmIDs                 = sdk.find_type_definition("app.EnemyManager"):get_field("_ValidEmIds");
@@ -125,9 +130,30 @@ function Monsters.UpdateMonster(enemy)
                 monster.isDead = browser:get_IsHealthZero();
                 monster.area = browser:getCurrentAreaNo();
             end
-            -- check if death state changend and update the size info if it did
-            if previousIsDead ~= monster.isDead then
-                Monsters.InitSizeInfo(monster.emId);
+
+            -- Update death state
+            if not monster.isDead then
+                local chr_ctx = ctx_holder:get_Chara();
+                if chr_ctx ~= nil then
+                    local health_mgr = chr_ctx:get_HealthManager();
+                    if health_mgr ~= nil then
+                        monster.isDead = health_mgr:get_Health() <= 0.0;
+                    end
+                end
+            end
+
+            -- Update the current monster action
+            local enemyManageInfo = FindEnemyUniqueIndex(Singletons.EnemyManager, monster.uniqueId);
+            if enemyManageInfo ~= nil then
+                local character = enemyManageInfo:get_Character();
+                if character ~= nil then
+                    local enemyAction = character:getCurrentAction();
+                    if enemyAction ~= nil then
+                        local Action = enemyAction:get_type_definition():get_full_name();
+                        monster.currentAction = tostring(Action);
+                        monster.inCocoon = monster.currentAction:endswith("cWaitCocoon");
+                    end
+                end
             end
         end
     else
@@ -184,6 +210,7 @@ function Monsters.NewMonster(ctx)
             monster.area = area;
             monster.roleId = ctx:get_RoleID();
             monster.legendaryId = ctx:get_LegendaryID();
+            monster.inCocoon = false;
         end
 
         Utils.logDebug("Found " .. Monsters.GetEnemyName(monster.emId) .. " in area " .. tostring(monster.area))
@@ -371,12 +398,31 @@ end
 
 -------------------------------------------------------------------
 
+local pendingUpdateEmId = nil;
+
+function Monsters.OnWriteRecord(emId)
+    Utils.logDebug("OnWriteRecord called with " .. tostring(emId));
+    Monsters.InitSizeInfo(emId);
+end
+
+-------------------------------------------------------------------
+
 -- initializes the module
 function Monsters.InitModule()
     -- hook into the enemy update method
     Utils.Hook("app.EnemyCharacter", "doUpdateEnd", function(args)
         pcall(Monsters.UpdateMonster, sdk.to_managed_object(args[2]));
     end);
+
+    Utils.Hook("app.EnemyReportUtil", "setWriteRecord",
+        function(args)
+            pendingUpdateEmId = sdk.to_int64(args[2]);
+        end,
+        function(retval)
+            if pendingUpdateEmId ~= nil then Monsters.OnWriteRecord(pendingUpdateEmId) end;
+            pendingUpdateEmId = nil;
+            return retval;
+        end);
 
     Monsters.InitEnemyTypesList();
     Monsters.InitSizeInfos();
