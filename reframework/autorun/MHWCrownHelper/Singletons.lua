@@ -4,6 +4,7 @@ Singletons.EnemyManager = nil;
 Singletons.GUIManager = nil;
 Singletons.GameFlowManager = nil;
 Singletons.ChatManager = nil;
+Singletons.MissionManager = nil;
 
 Singletons.isInitialized = false;
 
@@ -18,6 +19,7 @@ function Singletons.Init()
     Singletons.GUIManager = Singletons.InitSingleton("app.GUIManager");
     Singletons.GameFlowManager = Singletons.InitSingleton("app.GameFlowManager");
     Singletons.ChatManager = Singletons.InitSingleton("app.ChatManager");
+    Singletons.MissionManager = Singletons.InitSingleton("app.MissionManager");
 
     return Singletons.isInitialized;
 end

@@ -44,6 +44,7 @@ function Settings.Init()
             drawMode = Settings.DrawMode.Simple,
             showActualSize = true,
             showMonsterMode = Settings.ShowMonstersMode.CrownsOnly,
+            ignoreSilverCrowns = false,
 
             autoHide = false,
             autoHideAfter = 20,
@@ -58,6 +59,7 @@ function Settings.Init()
         notifications = {
             notificationType = Settings.NotificationType.Enabled,
             notificationMode = Settings.ShowMonstersMode.CrownsOnly,
+            ignoreSilverCrowns = false,
             notificionDisplayTime = 5,
             notificationsOffset = {
                 x = 0,

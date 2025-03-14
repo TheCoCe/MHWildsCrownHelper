@@ -194,6 +194,7 @@ function SizeGraph.DrawMonsterList()
     for monster, widget in pairs(SizeGraphWidgets) do
         -- Skip normal size monsters in crown only modes
         if Settings.current.sizeDetails.showMonsterMode >= Settings.ShowMonstersMode.CrownsOnly and monster.isNormal then goto continue; end;
+        if Settings.current.sizeDetails.ignoreSilverCrowns and Settings.current.sizeDetails.showMonsterMode ~= Settings.ShowMonstersMode.All and monster.isBig then goto continue; end;
 
         local sizeInfo = Monsters.GetSizeInfoForEnemyType(monster.emId);
         if sizeInfo == nil then goto continue; end;
@@ -214,10 +215,17 @@ function SizeGraph.DrawMonsterList()
             end
         end
 
-        local headerString = Monsters.GetEnemyName(monster.emId) .. " (" .. tostring(monster.area) .. ")";
+        local targetArea = "?";
+        if monster.area > 0 and monster.area < 100 then
+            targetArea = tostring(monster.area);
+        elseif monster.targetArea > 0 and monster.targetArea < 100 then
+            targetArea = tostring(monster.targetArea);
+        end
+        local headerString = Monsters.GetEnemyName(monster.emId) .. " (" .. tostring(targetArea) .. ")";
 
         posy = widget:draw(headerString, posy, monster.size, sizeInfo.smallBorder, sizeInfo.bigBorder,
-            sizeInfo.kingBorder, sizeInfo.baseSize, monster.crownType, isNewRecord);
+            sizeInfo.kingBorder, sizeInfo.baseSize, monster.crownType, isNewRecord, monster.inCocoon,
+            monster.isQuestTarget);
         posy = posy + baseSpacingY * h + Settings.current.sizeDetails.sizeDetailsOffset.spacing;
 
         ::continue::
@@ -285,12 +293,13 @@ end
 -------------------------------------------------------------------
 
 function SizeGraphWidget.Draw(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder,
-                              baseSize, crownType, isNewRecord)
+                              baseSize, crownType, isNewRecord, inCocoon, isQuestTarget)
     if Settings.current.sizeDetails.drawMode == Settings.DrawMode.Simple then
-        return SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize, isNewRecord);
+        return SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize, isNewRecord, inCocoon,
+            isQuestTarget);
     else
         return SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder, baseSize,
-            crownType, isNewRecord);
+            crownType, isNewRecord, inCocoon, isQuestTarget);
     end
 end
 
@@ -300,7 +309,7 @@ local bgMarginX = 25 / 2560;
 local bgMarginY = 5 / 1440;
 local titleIconPadding = 2 / 2560;
 
-function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize, isNewRecord)
+function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSize, isNewRecord, inCocoon, isQuestTarget)
     local w, h = Drawing.GetWindowSize();
     local textWidth, textHeight = Drawing.MeasureText(title);
 
@@ -313,14 +322,17 @@ function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSiz
     local crownImageWidth = (isCrown and (2 * titleIconPadding * w + imageSize) or 0);
 
     local newRecordImageWidth = (isNewRecord and ((isCrown and 1 or 2) * titleIconPadding * w + imageSize) or 0);
+    local stateImageWidth = ((inCocoon or isQuestTarget) and (2 * titleIconPadding * w + imageSize) or 0);
 
-    local bgSizeX = textWidth + 2 * bgMarginX * w + crownImageWidth + newRecordImageWidth + sizeTextWidth;
+    local bgSizeX = textWidth + 2 * bgMarginX * w + crownImageWidth + newRecordImageWidth + sizeTextWidth +
+        stateImageWidth;
     local bgSizeY = textHeight + 2 * bgMarginY * h;
     local bgPosX = (rightOffset * w) + bgSizeX + Settings.current.sizeDetails.sizeDetailsOffset.x;
     local bgPosY = posy + s.AnimData.offset.y;
     bgPosX, bgPosY = Drawing.FromTopRight(bgPosX, bgPosY);
 
     Drawing.DrawImage(Drawing.imageResources["sgbg"], bgPosX, bgPosY, bgSizeX, bgSizeY, 0, 0, s.AnimData.offset);
+
 
     local textPosX = (rightOffset * w) + textWidth + bgMarginX * w + crownImageWidth + newRecordImageWidth +
         sizeTextWidth + Settings.current.sizeDetails.sizeDetailsOffset.x;
@@ -330,6 +342,23 @@ function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSiz
     Drawing.DrawText(title, textPosX, textPosY, s.AnimData.textColor, true, 1.5, 1.5, s.AnimData.textShadowColor,
         s.AnimData.offset);
 
+    if inCocoon or isQuestTarget then
+        local stateX = (rightOffset * w) + textWidth + bgMarginX * w + crownImageWidth + newRecordImageWidth +
+            sizeTextWidth + titleIconPadding * w + Settings.current.sizeDetails.sizeDetailsOffset.x;
+        stateX, _ = Drawing.FromTopRight(stateX, 0);
+        local image = nil;
+        if isQuestTarget then
+            image = Drawing.imageResources["quest_target"];
+        else
+            image = Drawing.imageResources["cocoon"];
+        end
+        if image ~= nil then
+            Drawing.DrawImage(image, stateX, textPosY + textHeight * 0.5, imageSize, imageSize, 1,
+                0.5,
+                s.AnimData.offset);
+        end
+    end
+
     if isCrown then
         local image = Drawing.imageResources[crownType];
         if image ~= nil then
@@ -338,7 +367,7 @@ function SizeGraph.DrawCollapsed(s, title, posy, crownType, monsterSize, baseSiz
         end
     end
     if isNewRecord then
-        local image = Drawing.imageResources["book"];
+        local image = Drawing.imageResources["new_record"];
         if image ~= nil then
             Drawing.DrawImage(image, textPosX + textWidth + (isCrown and 0 or titleIconPadding * w) + crownImageWidth,
                 textPosY + textHeight * 0.5, imageSize, imageSize, 0, 0.5, s.AnimData.offset);
@@ -364,9 +393,9 @@ local sgMarkerRadius = 4 / 1440;
 local sgBgMarginY = 20 / 1440;
 
 function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBorder, kingBorder, baseSize, crownType,
-                                 isNewRecord)
+                                 isNewRecord, inCocoon, isQuestTarget)
     local w, h = Drawing.GetWindowSize();
-    isNewRecord = true;
+
     -- draw |---------|-o--|
     local normalizedSize = (monsterSize - smallBorder) / (kingBorder - smallBorder);
     normalizedSize = math.min(math.max(normalizedSize, 0.0), 1.0);
@@ -395,11 +424,15 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
     local miniTextPosX = sgMiniPosX + sgTextMarginX * w + miniX;
 
     -- Title
-    local recordIconSize = titleY * 1.25;
-    local newRecordImageWidth = (isNewRecord and (titleIconPadding * w + recordIconSize) or 0);
+    local iconSize = titleY * 1.25;
+    local newRecordImageWidth = (isNewRecord and (titleIconPadding * w + iconSize) or 0);
+
+    local stateX = math.max(miniTextPosX,
+        titleX + bgMarginX * w + rightOffset * w + newRecordImageWidth);
+    local stateImageWidth = ((inCocoon or isQuestTarget) and (titleIconPadding * w + iconSize) or 0);
 
     local titlePosY = posy + bgMarginY * h;
-    local titlePosX = math.max(miniTextPosX, titleX + bgMarginX * w + rightOffset * w + newRecordImageWidth);
+    local titlePosX = stateX - stateImageWidth;
     titlePosX, titlePosY = Drawing.FromTopRight(titlePosX, titlePosY);
 
     -- Optional size
@@ -423,12 +456,26 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
     miniTextPosX, _ = Drawing.FromTopRight(miniTextPosX, 0);
 
     -- Background
-    local bgSizeX = w - titlePosX + bgMarginX * w;
+    local bgSizeX = stateX + bgMarginX * w;
     local bgSizeY = kingTextPosY - posy + sgBgMarginY * h + kingY;
-    local bgPosX = titlePosX - bgMarginX * w;
+    local bgPosX = w - stateX - bgMarginX * w;
 
     -- Draw in correct order
     Drawing.DrawImage(Drawing.imageResources["sgbg"], bgPosX, posy, bgSizeX, bgSizeY, 0, 0, s.AnimData.offset);
+
+    if inCocoon or isQuestTarget then
+        stateX, _ = Drawing.FromTopRight(stateX, 0);
+        local image = nil;
+        if isQuestTarget then
+            image = Drawing.imageResources["quest_target"];
+        else
+            image = Drawing.imageResources["cocoon"];
+        end
+        if image ~= nil then
+            Drawing.DrawImage(image, stateX, titlePosY + titleY * 0.5, iconSize, iconSize, 0,
+                0.5, s.AnimData.offset);
+        end
+    end
 
     Drawing.DrawText(title, titlePosX, titlePosY, s.AnimData
         .textColor, true, 1.5,
@@ -436,10 +483,10 @@ function SizeGraph.DrawSizeGraph(s, title, posy, monsterSize, smallBorder, bigBo
         s.AnimData.offset);
 
     if isNewRecord then
-        local image = Drawing.imageResources["book"];
+        local image = Drawing.imageResources["new_record"];
         if image ~= nil then
             Drawing.DrawImage(image, titlePosX + titleX + titleIconPadding * w,
-                titlePosY + titleY * 0.5, newRecordImageWidth, newRecordImageWidth, 0, 0.5, s.AnimData.offset);
+                titlePosY + titleY * 0.5, iconSize, iconSize, 0, 0.5, s.AnimData.offset);
         end
     end
 

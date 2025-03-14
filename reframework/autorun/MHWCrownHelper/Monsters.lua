@@ -30,10 +30,10 @@ local ReportUtil                 = sdk.find_type_definition("app.EnemyReportUtil
 local ReportUtilMinSize          = ReportUtil:get_method("getMinSize(app.EnemyDef.ID)");
 local ReportUtilMaxSize          = ReportUtil:get_method("getMaxSize(app.EnemyDef.ID)");
 
-local CocoonWaitTimeField        = sdk.find_type_definition("app.cEnemyContext"):get_field("CocoonWaitTime");
-
 local FindEnemyUniqueIndex       = sdk.find_type_definition("app.EnemyManager"):get_method(
     "findEnemy_UniqueIndex(System.Int32)");
+local IsQuestTarget              = sdk.find_type_definition("app.MissionManager"):get_method(
+    "isQuestTarget(app.TARGET_ACCESS_KEY)");
 
 -- EmIDs
 local ValidEmIDs                 = sdk.find_type_definition("app.EnemyManager"):get_field("_ValidEmIds");
@@ -101,7 +101,7 @@ end
 
 --- Monster hook function.
 ---@param enemy EnemyCharacter The enemy provided by the hook
-function Monsters.UpdateMonster(enemy)
+function Monsters.doUpdateEndCallback(enemy)
     if enemy == nil then
         return;
     end
@@ -118,17 +118,20 @@ function Monsters.UpdateMonster(enemy)
 
     local monster = Monsters.monsters[ctx];
     local time = os.time();
+    if monster == nil then
+        monster = Monsters.NewMonster(ctx);
+        monster.NextUpdate = time;
+    end
 
     if monster ~= nil then
         if monster.NextUpdate - time <= 0 then
             monster.LastUpdate = time;
             monster.NextUpdate = time + Monsters.UpdateInterval;
 
-            local previousIsDead = monster.isDead;
-            local browser = ctx:get_Browser()
+            local browser = ctx:get_Browser();
             if browser then
-                monster.isDead = browser:get_IsHealthZero();
                 monster.area = browser:getCurrentAreaNo();
+                monster.targetArea = browser:getTargetAreaNo();
             end
 
             -- Update death state
@@ -152,13 +155,15 @@ function Monsters.UpdateMonster(enemy)
                         local Action = enemyAction:get_type_definition():get_full_name();
                         monster.currentAction = tostring(Action);
                         monster.inCocoon = monster.currentAction:endswith("cWaitCocoon");
+                        Utils.logDebug(Monsters.GetEnemyName(monster.emId) .. ": " .. monster.currentAction);
                     end
                 end
             end
+
+            if monster.TARGET_ACCESS_KEY ~= nil then
+                monster.isQuestTarget = IsQuestTarget(Singletons.MissionManager, monster.TARGET_ACCESS_KEY);
+            end
         end
-    else
-        local monster = Monsters.NewMonster(ctx);
-        monster.NextUpdate = time + Monsters.UpdateInterval;
     end
 end
 
@@ -192,25 +197,27 @@ function Monsters.NewMonster(ctx)
         if size ~= nil then
             monster.size = size;
 
-            local crownType = 0;
-            local isDead = false;
-            local area = 0;
-            local browser = ctx:get_Browser();
-            if browser then
-                crownType = browser:checkCrownType();
-                isDead = browser:get_IsHealthZero();
-                area = browser:getCurrentAreaNo();
-            end
-            monster.crownType = crownType;
-            monster.isNormal = crownType == 0;
-            monster.isSmall = crownType == 1;
-            monster.isBig = crownType == 2;
-            monster.isKing = crownType == 3;
-            monster.isDead = isDead;
-            monster.area = area;
+            monster.TARGET_ACCESS_KEY = nil;
+            monster.crownType = 0;
+            monster.isDead = false;
+            monster.area = 0;
             monster.roleId = ctx:get_RoleID();
             monster.legendaryId = ctx:get_LegendaryID();
+            monster.isQuestTarget = false;
             monster.inCocoon = false;
+
+            local browser = ctx:get_Browser();
+            if browser then
+                monster.TARGET_ACCESS_KEY = browser:get_ThisTargetAccessKey();
+                monster.crownType = browser:checkCrownType();
+                monster.isDead = browser:get_IsHealthZero();
+                monster.area = browser:getCurrentAreaNo();
+            end
+
+            monster.isNormal = monster.crownType == 0;
+            monster.isSmall = monster.crownType == 1;
+            monster.isBig = monster.crownType == 2;
+            monster.isKing = monster.crownType == 3;
         end
 
         Utils.logDebug("Found " .. Monsters.GetEnemyName(monster.emId) .. " in area " .. tostring(monster.area))
@@ -411,7 +418,7 @@ end
 function Monsters.InitModule()
     -- hook into the enemy update method
     Utils.Hook("app.EnemyCharacter", "doUpdateEnd", function(args)
-        pcall(Monsters.UpdateMonster, sdk.to_managed_object(args[2]));
+        pcall(Monsters.doUpdateEndCallback, sdk.to_managed_object(args[2]));
     end);
 
     Utils.Hook("app.EnemyReportUtil", "setWriteRecord",

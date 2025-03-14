@@ -38,7 +38,6 @@ function SettingsMenu.Draw()
             Settings.current.sizeDetails.showActualSize);
         settingsChanged = settingsChanged or changed;
 
-
         local sgMonstersMode = {
             [Settings.ShowMonstersMode.All] = "All monsters",
             [Settings.ShowMonstersMode.CrownsOnly] =
@@ -50,7 +49,14 @@ function SettingsMenu.Draw()
             Settings.current.sizeDetails.showMonsterMode, sgMonstersMode);
         settingsChanged = settingsChanged or changed;
 
-        imgui.text("A book icon will indicate that the monster is a new record.");
+        if Settings.current.sizeDetails.showMonsterMode ~= Settings.ShowMonstersMode.All then
+            changed, Settings.current.sizeDetails.ignoreSilverCrowns = imgui.checkbox(
+                "Ignore silver crowns",
+                Settings.current.sizeDetails.ignoreSilverCrowns);
+            settingsChanged = settingsChanged or changed;
+        end
+
+        imgui.text("A blue paper & quill icon will indicate that the monster is a new record.");
         imgui.new_line();
 
         local options = {
@@ -144,6 +150,11 @@ function SettingsMenu.Draw()
         }
         changed, Settings.current.notifications.notificationMode = imgui.combo("Displayed monsters",
             Settings.current.notifications.notificationMode, ntfyMonstersMode);
+        settingsChanged = settingsChanged or changed;
+
+        changed, Settings.current.notifications.ignoreSilverCrowns = imgui.checkbox(
+            "Ignore silver crowns",
+            Settings.current.notifications.ignoreSilverCrowns);
         settingsChanged = settingsChanged or changed;
 
         if Settings.current.notifications.notificationType ~= Settings.NotificationType.Disabled then

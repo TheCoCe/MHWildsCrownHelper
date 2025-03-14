@@ -19,6 +19,7 @@ function OnMonsterAdded(monster)
     if Settings.current.notifications.notificationType == Settings.NotificationType.Disabled then return; end;
     if monster == nil then return; end;
     if monster.isNormal or monster.isDead then return; end;
+    if Settings.current.notifications.ignoreSilverCrowns and monster.isBig then return; end;
     local sizeInfo = Monsters.GetSizeInfoForEnemyType(monster.emId);
     if sizeInfo == nil then return; end;
     local isNewRecord = monster.size < sizeInfo.minHuntedSize or monster.size > sizeInfo.maxHuntedSize;

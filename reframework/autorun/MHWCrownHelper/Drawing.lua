@@ -4,8 +4,8 @@ local Settings            = require("MHWCrownHelper.Settings");
 local Animation           = require("MHWCrownHelper.Animation")
 local Utils               = require("MHWCrownHelper.Utils")
 local Const               = require("MHWCrownHelper.Const")
-local d2d = d2d;
-local draw = draw;
+local d2d                 = d2d;
+local draw                = draw;
 
 -- window size
 local getMainViewMethod   = sdk.find_type_definition("via.SceneManager"):get_method("get_MainView");
@@ -30,6 +30,9 @@ function Drawing.Init()
         Drawing.InitImage("big_gs", "BigCrown_gs.png");
         Drawing.InitImage("king_gs", "KingCrown_gs.png");
         Drawing.InitImage("book", "Book.png");
+        Drawing.InitImage("new_record", "NewRecord.png");
+        Drawing.InitImage("cocoon", "Cocoon.png");
+        Drawing.InitImage("quest_target", "QuestTarget.png");
 
         Drawing.InitImage("nbgs", "NotificationBgS.png");
         Drawing.InitImage("nbgf", "NotificationBgF.png");
