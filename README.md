@@ -2,7 +2,8 @@
 REFramework based script to notify you if a there is a chance to obtain a crown in the current locale.
 
 ## Crown Display/Size Graph
-![Monster Info/Size List](https://github.com/user-attachments/assets/806d253a-7b1e-4c4d-9582-6997927103a5)
+![Monster Info/Size List](https://github.com/user-attachments/assets/7f43523a-3359-4e42-9b05-af2fe55663b0)
+
 
 Shows a list of monsters in the current locale and the area they are in. This list can be configured to show all monsters, crowns only, hide already obtained and even show a detailed size graph.
 Check the mods settings in the `Script Generated UI` section of REFramework for all possible configurations.
