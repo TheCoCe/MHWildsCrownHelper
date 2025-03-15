@@ -220,11 +220,11 @@ function Monsters.NewMonster(ctx)
             monster.isKing = monster.crownType == 3;
         end
 
-        Utils.logDebug("Found " .. Monsters.GetEnemyName(monster.emId) .. " in area " .. tostring(monster.area))
+        --[[         Utils.logDebug("Found " .. Monsters.GetEnemyName(monster.emId) .. " in area " .. tostring(monster.area)) ]]
     end
 
-    Utils.logDebug("registered '" ..
-        enemyName .. "' \tSize: '" .. string.format("%.2f", monster.size) .. "' " .. Const.CrownNames[monster.crownType]);
+    --[[     Utils.logDebug("registered '" ..
+        enemyName .. "' \tSize: '" .. string.format("%.2f", monster.size) .. "' " .. Const.CrownNames[monster.crownType]); ]]
 
     if Monsters.monsters[ctx] == nil then
         Monsters.monsters[ctx] = monster;
@@ -346,7 +346,7 @@ function Monsters.InitSizeInfo(EmId)
 
     local monsterDef = Monsters.monsterDefinitions[EmId];
     if monsterDef == nil then return end;
-    Utils.logDebug("Initializing size info for emType (" .. monsterDef.name .. "): " .. monsterDef.emString);
+    --[[     Utils.logDebug("Initializing size info for emType (" .. monsterDef.name .. "): " .. monsterDef.emString); ]]
 
     ---@type cSizeData
     local sizeData = GetSizeDataMethod(emParamSize, EmId);
@@ -379,7 +379,7 @@ function Monsters.InitSizeInfo(EmId)
             not sizeInfo.kingCrownObtained;
         -- set size info on monsterDefinition
         monsterDef.sizeInfo = sizeInfo;
-        Utils.logDebug(
+        --[[         Utils.logDebug(
             " BaseSize: " .. tostring(sizeInfo.baseSize) ..
             " SmallBorder: " .. tostring(sizeInfo.smallBorder) ..
             " Bigborder: " .. tostring(sizeInfo.bigBorder) ..
@@ -390,7 +390,7 @@ function Monsters.InitSizeInfo(EmId)
             " Minhuntedsize: " .. tostring(sizeInfo.minHuntedSize) ..
             " Maxhuntedsize: " .. tostring(sizeInfo.maxHuntedSize) ..
             " Crownneeded: " .. tostring(sizeInfo.crownNeeded) ..
-            " Crownenabled: " .. tostring(sizeInfo.crownEnabled));
+            " Crownenabled: " .. tostring(sizeInfo.crownEnabled)); ]]
     end
 end
 

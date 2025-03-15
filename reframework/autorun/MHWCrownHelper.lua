@@ -41,10 +41,6 @@ end
 -------------------------------------------------------------------
 
 function CrownHelper.OnFrame()
-    if not IsPlayableScene(Singletons.GameFlowManager) then
-        return;
-    end
-
     -- frame time currently unused -> no need to tick
     Time.Tick();
 
@@ -53,12 +49,12 @@ function CrownHelper.OnFrame()
         CrownHelper.HandleInit();
         -- player ingame
     else
+        if not IsPlayableScene(Singletons.GameFlowManager) then
+            return;
+        end
+
         CrownTracker.DrawCrownTracker();
         Monsters.Update(Time.timeDelta);
-        -- draw size info
-        if not d2d and Settings.current.sizeDetails.showSizeDetails then
-            Monsters.IterateMonsters(Drawing.DrawMonsterDetails);
-        end
     end
 end
 

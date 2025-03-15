@@ -38,6 +38,7 @@ end
 function Utils.logDebug(message)
     if Utils.debugMode then
         log.debug(nameString .. message);
+        log.info(nameString .. message);
     end
 end
 
@@ -153,11 +154,17 @@ end
 -------------------------------------------------------------------
 
 function Utils.GetLanguage()
-    if not Singletons.GUIManager then
+    --[[ if not Singletons.GUIManager then
         return Const.Language.English;
     end
 
-    return Singletons.GUIManager:getSystemLanguageToApp();
+    return Singletons.GUIManager:getSystemLanguageToApp(); ]]
+    local optionUtil = sdk.find_type_definition("app.OptionUtil");
+    local getLanguage = optionUtil:get_method("getTextLanguage()");
+    local lang = getLanguage(nil);
+    local languageDef = sdk.find_type_definition("app.LanguageDef");
+    local covertLanguage = languageDef:get_method("convert(app.LanguageDef.LANGUAGE_APP)");
+    return covertLanguage(nil, lang);
 end
 
 -------------------------------------------------------------------
@@ -168,8 +175,10 @@ local cachedImguiFonts = {};
 ---@param fontSizes table<any, number>
 function Utils.InitFontImgui(key, fontSizes)
     local language = Utils.GetLanguage();
+    Utils.logDebug("[Utils.InitFontImgui] GetLanguage returned: " .. tostring(language));
     local fontInfo = Const.Fonts[language];
     if not fontInfo then
+        Utils.logDebug("Fallback");
         fontInfo = Const.Fonts.Default;
     end
 
@@ -181,9 +190,14 @@ function Utils.InitFontImgui(key, fontSizes)
             size = Const.Fonts.DEFAULT_FONT_SIZE;
         end
 
-        fonts[v] = imgui.load_font(fontInfo.FONT_NAME, size, fontInfo.GLYPH_RANGES);
+        Utils.logDebug("[Utils.InitFontImgui] Added font " ..
+            fontInfo.FONT_NAME .. " with for setting " .. tostring(v) .. " with size " .. size);
+        local font = imgui.load_font(fontInfo.FONT_NAME, size, fontInfo.GLYPH_RANGES);
+        Utils.logDebug(type(font) .. " " .. tostring(font));
+        fonts[v] = font;
     end
 
+    Utils.logDebug("[Utils.InitFontImgui] Cached font with key: " .. tostring(key));
     cachedImguiFonts[key] = fonts;
 end
 

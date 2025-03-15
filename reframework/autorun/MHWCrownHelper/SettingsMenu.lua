@@ -196,6 +196,17 @@ function SettingsMenu.Draw()
             Settings.current.crownTracker.showSizeBorders);
         settingsChanged = settingsChanged or changed;
 
+        local options = {
+            [Const.Fonts.SIZES.TINY] = "Tiny",
+            [Const.Fonts.SIZES.SMALL] = "Small",
+            [Const.Fonts.SIZES.MEDIUM] = "Medium",
+            [Const.Fonts.SIZES.LARGE] = "Large",
+            [Const.Fonts.SIZES.HUGE] = "Huge"
+        }
+        changed, Settings.current.text.size = imgui.combo("Size",
+            Settings.current.text.size, options);
+        settingsChanged = settingsChanged or changed;
+
         imgui.new_line();
 
         if imgui.button("Reset window position/size") then

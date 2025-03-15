@@ -36,12 +36,10 @@ Const.Language = {
 }
 
 
--- Fonts --
-
 Const.Fonts = {
     Default = {
         FONT_FAMILY = "Noto Sans",
-        FONT_NAME = 'NotoSans-Bold.otf',
+        FONT_NAME = 'NotoSans-Bold.ttf',
         GLYPH_RANGES = {
             0x0020, 0x00FF, -- Basic Latin + Latin Supplement
             0x0370, 0x03FF, -- Greek alphabet
@@ -53,33 +51,33 @@ Const.Fonts = {
     },
     [Const.Language.SimplifiedChinese] = {
         FONT_FAMILY = "Noto Sans SC",
-            FONT_NAME = 'NotoSansSC-Bold.otf',
-            GLYPH_RANGES = {
-                0x0020, 0x00FF, -- Basic Latin + Latin Supplement
-                0x0370, 0x03FF, -- Greek alphabet
-                0x2000, 0x206F, -- General Punctuation
-                0x2160, 0x217F, -- Roman Numbers
-                0x3000, 0x30FF, -- CJK Symbols and Punctuations, Hiragana, Katakana
-                0x31F0, 0x31FF, -- Katakana Phonetic Extensions
-                0xFF00, 0xFFEF, -- Half-width characters
-                0x4e00, 0x9FAF, -- CJK Ideograms
-                0,
-            }
+        FONT_NAME = 'NotoSansSC-Bold.otf',
+        GLYPH_RANGES = {
+            0x0020, 0x00FF, -- Basic Latin + Latin Supplement
+            0x0370, 0x03FF, -- Greek alphabet
+            0x2000, 0x206F, -- General Punctuation
+            0x2160, 0x217F, -- Roman Numbers
+            0x3000, 0x30FF, -- CJK Symbols and Punctuations, Hiragana, Katakana
+            0x31F0, 0x31FF, -- Katakana Phonetic Extensions
+            0xFF00, 0xFFEF, -- Half-width characters
+            0x4e00, 0x9FAF, -- CJK Ideograms
+            0,
+        }
     },
     [Const.Language.TraditionalChinese] = {
         FONT_FAMILY = "Noto Sans SC",
-            FONT_NAME = 'NotoSansSC-Bold.otf',
-            GLYPH_RANGES = {
-                0x0020, 0x00FF, -- Basic Latin + Latin Supplement
-                0x0370, 0x03FF, -- Greek alphabet
-                0x2000, 0x206F, -- General Punctuation
-                0x2160, 0x217F, -- Roman Numbers
-                0x3000, 0x30FF, -- CJK Symbols and Punctuations, Hiragana, Katakana
-                0x31F0, 0x31FF, -- Katakana Phonetic Extensions
-                0xFF00, 0xFFEF, -- Half-width characters
-                0x4e00, 0x9FAF, -- CJK Ideograms
-                0,
-            }
+        FONT_NAME = 'NotoSansSC-Bold.otf',
+        GLYPH_RANGES = {
+            0x0020, 0x00FF, -- Basic Latin + Latin Supplement
+            0x0370, 0x03FF, -- Greek alphabet
+            0x2000, 0x206F, -- General Punctuation
+            0x2160, 0x217F, -- Roman Numbers
+            0x3000, 0x30FF, -- CJK Symbols and Punctuations, Hiragana, Katakana
+            0x31F0, 0x31FF, -- Katakana Phonetic Extensions
+            0xFF00, 0xFFEF, -- Half-width characters
+            0x4e00, 0x9FAF, -- CJK Ideograms
+            0,
+        }
     },
     [Const.Language.Korean] = {
         FONT_FAMILY = "Noto Sans KR",

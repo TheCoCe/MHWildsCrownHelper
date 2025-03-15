@@ -47,12 +47,24 @@ end
 -------------------------------------------------------------------
 
 function CrownTracker.InitModule()
+    Utils.InitFontImgui("regular", {
+        [Const.Fonts.SIZES.TINY] = 12,
+        [Const.Fonts.SIZES.SMALL] = 18,
+        [Const.Fonts.SIZES.MEDIUM] = 24,
+        [Const.Fonts.SIZES.LARGE] = 30,
+        [Const.Fonts.SIZES.HUGE] = 36
+    });
 end
 
 -------------------------------------------------------------------
 
 ---Draws the crown tracker window
 function CrownTracker.DrawCrownTracker()
+    local font = Utils.GetFontImgui("regular", Settings.current.text.size);
+    if font ~= nil then
+        imgui.push_font(font);
+    end
+
     if Settings.current.crownTracker.crownTrackerMode == Settings.CrownTrackerMode.ShowAlways or
         (Settings.current.crownTracker.crownTrackerMode == Settings.CrownTrackerMode.ShowWithREFUI and reframework:is_drawing_ui()) then
         local flags = GetWindowFlags();
@@ -64,6 +76,10 @@ function CrownTracker.DrawCrownTracker()
         else
             CrownTracker.crownTableVisible = false;
         end
+    end
+
+    if font ~= nil then
+        imgui.pop_font();
     end
 end
 
@@ -78,6 +94,8 @@ function CrownTracker.DrawMonsterSizeTable()
     if Settings.current.crownTracker.showCurrentRecords then
         tableSize = tableSize + 2;
     end
+
+    imgui.text("丁丂临乒乔乕");
 
     if imgui.begin_table("Monster Crown Tracker", tableSize, tableFlags) then
         imgui.table_setup_column("Monster");
@@ -151,6 +169,10 @@ function CrownTracker.DrawMonsterSizeTable()
         end
 
         imgui.end_table();
+    end
+
+    if font ~= nil then
+        imgui.pop_font();
     end
 end
 
