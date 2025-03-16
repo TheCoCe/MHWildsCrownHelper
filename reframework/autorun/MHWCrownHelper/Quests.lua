@@ -54,7 +54,6 @@ end
 function Quests.InitModule()
     Utils.Hook("app.EnemyManager", "evSceneLoadEnd_ThroughJunction", Quests.OnSceneLoadEndHook);
     Utils.Hook("app.EnemyManager", "evSceneLoadEnd_FastTravel", Quests.OnSceneLoadEndHook);
-    --Utils.Hook("app.PlayerUtil", "createMasterPlayer", nil, Quests.PostCreateMasterPlayer);
     Utils.Hook("app.PlayerManager", "registerPlayer", nil, Quests.PostCreateMasterPlayer);
     Quests.UpdateMasterPlayer();
     Utils.logDebug("Quests Initialized");

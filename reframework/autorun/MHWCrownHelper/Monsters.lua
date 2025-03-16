@@ -239,9 +239,6 @@ end
 ---Iterates all known monsters and calls the provided function with it and its index.
 ---@param f function The function to call for each monster f(enemy, index)
 function Monsters.IterateMonsters(f)
-    --[[ for i = 1, #orderedMapMonsters, 1 do
-        f(orderedMapMonsters[i], i - 1);
-    end ]]
     local i = 0;
     for _, v in ipairs(Monsters.monsters) do
         f(v, i);
