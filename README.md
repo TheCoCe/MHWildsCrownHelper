@@ -33,7 +33,7 @@ Fonts loaded by CrownHelper will be defined by the ingame text language setting 
 
 ## Optional Requirements
 If you need Chinese, Japanese or Korean font support, CrownHelper supports one the Catlib optional font pack.
-[Catlib optional FontPack by lingsamuel](https://www.nexusmods.com/monsterhunterwilds/mods/65?tab=files)
+- [Catlib optional FontPack by lingsamuel](https://www.nexusmods.com/monsterhunterwilds/mods/65?tab=files)
 
 Fonts loaded by CrownHelper will be defined by the ingame text language setting and only update when reloading the script.
 
