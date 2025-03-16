@@ -577,8 +577,11 @@ function SizeGraph.InitModule()
             Utils.logDebug("onMonsterRemoved: " .. Monsters.GetEnemyName(monster.emId));
         end);
 
-    Settings.onSettingsChanged:add(function()
-        SizeGraph.SizeGraphOpen();
+    Settings.onSettingsChanged:add(function(changeKey)
+        if changeKey == "autoHide" then
+            Animation.StopAllAnimations();
+            SizeGraph.SizeGraphOpen();
+        end
     end)
     Utils.logDebug("SizeGraph Initialized");
 end

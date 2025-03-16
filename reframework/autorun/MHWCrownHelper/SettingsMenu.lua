@@ -22,6 +22,7 @@ function SettingsMenu.Draw()
 
     local settingsChanged = false;
     local changed = false;
+    local changedKey = "";
 
     if imgui.tree_node("Size Details") then
         local sgDrawMode = {
@@ -72,10 +73,12 @@ function SettingsMenu.Draw()
         if imgui.tree_node("Auto Hide") then
             changed, Settings.current.sizeDetails.autoHide = imgui.checkbox(
                 "Only show info for duration on update", Settings.current.sizeDetails.autoHide);
+            changedKey = "autoHide";
             settingsChanged = settingsChanged or changed;
 
             changed, Settings.current.sizeDetails.autoHideAfter = imgui.drag_float("Info show duration",
                 Settings.current.sizeDetails.autoHideAfter, 0.1, 1, 3600, "%.1f");
+            changedKey = "autoHide";
             settingsChanged = settingsChanged or changed;
 
             imgui.tree_pop();
@@ -221,7 +224,7 @@ function SettingsMenu.Draw()
 
     if settingsChanged then
         Settings.Save();
-        Settings.onSettingsChanged();
+        Settings.onSettingsChanged(changedKey);
     end
 end
 

@@ -6,6 +6,14 @@ local coroutines = {};
 
 -------------------------------------------------------------------
 
+function Animation.StopAllAnimations()
+    for i = 1, #coroutines, 1 do
+        coroutine.close(coroutines[i]);
+    end
+end
+
+-------------------------------------------------------------------
+
 function Animation.Update(deltaTime)
     for i = #coroutines, 1, -1 do
         if coroutine.status(coroutines[i]) == "dead" then
