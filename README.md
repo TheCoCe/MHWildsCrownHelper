@@ -4,7 +4,6 @@ REFramework based script to notify you if a there is a chance to obtain a crown 
 ## Crown Display/Size Graph
 ![Monster Info/Size List](https://github.com/user-attachments/assets/7f43523a-3359-4e42-9b05-af2fe55663b0)
 
-
 Shows a list of monsters in the current locale and the area they are in. This list can be configured to show all monsters, crowns only, hide already obtained and even show a detailed size graph.
 Check the mods settings in the `Script Generated UI` section of REFramework for all possible configurations.
 
@@ -25,6 +24,13 @@ You can access the Settings via the reframework script generated ui panel.
 2. [Direct2D for REFramework](https://www.nexusmods.com/monsterhunterrise/mods/134)
 
 (Direct2D links to MH Rise but will also work with Wilds)
+
+## Optional Requirements
+If you need Chinese, Japanese or Korean font support, CrownHelper supports one of the following font packs.
+1. [Catlib optional FontPack by lingsamuel](https://www.nexusmods.com/monsterhunterwilds/mods/65?tab=files)
+2. [CJK Font Support by NekoNekoYukari](https://www.nexusmods.com/monsterhunterwilds/mods/159?tab=files)
+
+Fonts loaded by CrownHelper will be defined by the ingame text language setting.
 
 ## Installation
 1. Make sure you have REFramework installed [REFramework](https://github.com/praydog/REFramework)
