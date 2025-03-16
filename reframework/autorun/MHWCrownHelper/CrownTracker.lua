@@ -96,8 +96,6 @@ function CrownTracker.DrawMonsterSizeTable()
         tableSize = tableSize + 2;
     end
 
-    imgui.text("丁丂临乒乔乕");
-
     if imgui.begin_table("Monster Crown Tracker", tableSize, tableFlags) then
         imgui.table_setup_column("Monster");
         imgui.table_setup_column("M");

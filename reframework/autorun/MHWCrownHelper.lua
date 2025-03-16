@@ -43,7 +43,6 @@ end
 -------------------------------------------------------------------
 
 function CrownHelper.OnFrame()
-    Utils.logDebug("OnFrame begin");
     -- frame time currently unused -> no need to tick
     Time.Tick();
 
@@ -56,7 +55,6 @@ function CrownHelper.OnFrame()
             return;
         end
 
-        Utils.logDebug("Trying to draw Crown Tracker");
         CrownTracker.DrawCrownTracker();
         Monsters.Update(Time.timeDelta);
     end

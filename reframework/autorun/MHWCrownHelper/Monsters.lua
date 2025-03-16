@@ -310,6 +310,7 @@ end
 
 --- Initializes the enemyTypes list and caches enemyType, enemyTypeIndex and name.
 function Monsters.InitEnemyTypesList()
+    Utils.logDebug("Initializing enemy types");
     local enemyEnum = Utils.GenerateEnumValues("app.EnemyDef.ID");
 
     -- get all valid emIds
@@ -339,14 +340,17 @@ end
 --- Initializes or updates existing size info for the specified EmID
 ---@param EmId EmID
 function Monsters.InitSizeInfo(EmId)
+    Utils.logDebug("InitSizeInfo called");
     local setting = GetSettingMethod(Singletons.EnemyManager);
     if setting == nil then return end;
+    Utils.logDebug("setting valid");
     local emParamSize = GetSizeMethod(setting);
     if emParamSize == nil then return end;
+    Utils.logDebug("emParamSize valid");
 
     local monsterDef = Monsters.monsterDefinitions[EmId];
     if monsterDef == nil then return end;
-    --[[     Utils.logDebug("Initializing size info for emType (" .. monsterDef.name .. "): " .. monsterDef.emString); ]]
+    Utils.logDebug("Initializing size info for emType (" .. monsterDef.name .. "): " .. monsterDef.emString);
 
     ---@type cSizeData
     local sizeData = GetSizeDataMethod(emParamSize, EmId);
@@ -379,7 +383,7 @@ function Monsters.InitSizeInfo(EmId)
             not sizeInfo.kingCrownObtained;
         -- set size info on monsterDefinition
         monsterDef.sizeInfo = sizeInfo;
-        --[[         Utils.logDebug(
+        Utils.logDebug(
             " BaseSize: " .. tostring(sizeInfo.baseSize) ..
             " SmallBorder: " .. tostring(sizeInfo.smallBorder) ..
             " Bigborder: " .. tostring(sizeInfo.bigBorder) ..
@@ -390,7 +394,7 @@ function Monsters.InitSizeInfo(EmId)
             " Minhuntedsize: " .. tostring(sizeInfo.minHuntedSize) ..
             " Maxhuntedsize: " .. tostring(sizeInfo.maxHuntedSize) ..
             " Crownneeded: " .. tostring(sizeInfo.crownNeeded) ..
-            " Crownenabled: " .. tostring(sizeInfo.crownEnabled)); ]]
+            " Crownenabled: " .. tostring(sizeInfo.crownEnabled));
     end
 end
 
@@ -398,7 +402,10 @@ end
 
 --- Initializes all size infos
 function Monsters.InitSizeInfos()
-    for k, v in pairs(Monsters.monsterDefinitions) do
+    if #Monsters.monsterDefinitions == 0 then
+        Monsters.InitEnemyTypesList();
+    end
+    for k, _ in pairs(Monsters.monsterDefinitions) do
         Monsters.InitSizeInfo(k);
     end
 end
@@ -431,9 +438,15 @@ function Monsters.InitModule()
             return retval;
         end);
 
-    Monsters.InitEnemyTypesList();
-    Monsters.InitSizeInfos();
     Quests.onLocationChanged:add(Monsters.OnLocationChangedCallback);
+    -- When the player changes (e.g. loading in the game/changing savegame) then load the size data
+    Quests.onPlayerChanged:add(function()
+        Utils.logDebug("onPlayerChanged called");
+        Monsters.InitSizeInfos();
+    end);
+    if Quests.HasMasterPlayer() then
+        Monsters.InitSizeInfos();
+    end
     Utils.logDebug("Monsters Initialized");
 end
 
