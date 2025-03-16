@@ -49,18 +49,19 @@ end
 function CrownTracker.InitModule()
     Utils.InitFontImgui("regular", {
         [Const.Fonts.SIZES.TINY] = 12,
-        [Const.Fonts.SIZES.SMALL] = 18,
-        [Const.Fonts.SIZES.MEDIUM] = 24,
-        [Const.Fonts.SIZES.LARGE] = 30,
-        [Const.Fonts.SIZES.HUGE] = 36
+        [Const.Fonts.SIZES.SMALL] = 16,
+        [Const.Fonts.SIZES.MEDIUM] = 20,
+        [Const.Fonts.SIZES.LARGE] = 24,
+        [Const.Fonts.SIZES.HUGE] = 30
     });
+    Utils.logDebug("CrownTracker Initialized");
 end
 
 -------------------------------------------------------------------
 
 ---Draws the crown tracker window
 function CrownTracker.DrawCrownTracker()
-    local font = Utils.GetFontImgui("regular", Settings.current.text.size);
+    local font = Utils.GetFontImgui("regular", Settings.current.text.trackerSize);
     if font ~= nil then
         imgui.push_font(font);
     end

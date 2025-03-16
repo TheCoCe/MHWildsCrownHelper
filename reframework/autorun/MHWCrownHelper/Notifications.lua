@@ -288,6 +288,7 @@ end
 
 function Notifications.InitModule()
     Monsters.onMonsterAdded:add(OnMonsterAdded);
+    Utils.logDebug("Notifications Initialized!");
 end
 
 return Notifications;

@@ -580,6 +580,7 @@ function SizeGraph.InitModule()
     Settings.onSettingsChanged:add(function()
         SizeGraph.SizeGraphOpen();
     end)
+    Utils.logDebug("SizeGraph Initialized");
 end
 
 return SizeGraph;

@@ -11,6 +11,7 @@ local Utils              = require("MHWCrownHelper.Utils");
 local CrownTracker       = require("MHWCrownHelper.CrownTracker");
 local SizeGraph          = require("MHWCrownHelper.SizeGraph");
 local Notifications      = require("MHWCrownHelper.Notifications");
+local Const              = require("MHWCrownHelper.Const")
 
 local IsPlayableScene    = sdk.find_type_definition("app.GameFlowManager"):get_method("get_IsPlayableScene()");
 
@@ -23,6 +24,7 @@ CrownHelper.isInitialized = false;
 function CrownHelper.HandleInit()
     -- Init all singletons
     if not Singletons.isInitialized then
+        Utils.logDebug("Initializing Singletons");
         if Singletons.Init() then
             -- Init modules that require all singletons to be set up
             Quests.InitModule();
@@ -41,6 +43,7 @@ end
 -------------------------------------------------------------------
 
 function CrownHelper.OnFrame()
+    Utils.logDebug("OnFrame begin");
     -- frame time currently unused -> no need to tick
     Time.Tick();
 
@@ -53,6 +56,7 @@ function CrownHelper.OnFrame()
             return;
         end
 
+        Utils.logDebug("Trying to draw Crown Tracker");
         CrownTracker.DrawCrownTracker();
         Monsters.Update(Time.timeDelta);
     end

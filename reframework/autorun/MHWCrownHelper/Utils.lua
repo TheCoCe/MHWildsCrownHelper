@@ -154,62 +154,72 @@ end
 -------------------------------------------------------------------
 
 function Utils.GetLanguage()
-    --[[ if not Singletons.GUIManager then
-        return Const.Language.English;
-    end
-
-    return Singletons.GUIManager:getSystemLanguageToApp(); ]]
-    local optionUtil = sdk.find_type_definition("app.OptionUtil");
+    --[[ local optionUtil = sdk.find_type_definition("app.OptionUtil");
     local getLanguage = optionUtil:get_method("getTextLanguage()");
     local lang = getLanguage(nil);
     local languageDef = sdk.find_type_definition("app.LanguageDef");
     local covertLanguage = languageDef:get_method("convert(app.LanguageDef.LANGUAGE_APP)");
-    return covertLanguage(nil, lang);
+    return covertLanguage(nil, lang); ]]
+    -- Specifically hardcoded traditional chinese for testing
+    return 12;
 end
 
 -------------------------------------------------------------------
 
-local cachedImguiFonts = {};
+local currentCachedFont = {
+    Font = nil,
+    size = -1,
+    language = -1
+};
+
+local cachedFontSettings = {};
 
 --- Load an imgui font
 ---@param fontSizes table<any, number>
 function Utils.InitFontImgui(key, fontSizes)
-    local language = Utils.GetLanguage();
-    Utils.logDebug("[Utils.InitFontImgui] GetLanguage returned: " .. tostring(language));
-    local fontInfo = Const.Fonts[language];
-    if not fontInfo then
-        Utils.logDebug("Fallback");
-        fontInfo = Const.Fonts.Default;
-    end
-
-    local fonts = {};
-
+    local fontSizeSettings = {};
     for _, v in pairs(Const.Fonts.SIZES) do
         local size = fontSizes[v];
-        if not size then
+        if size == nil then
             size = Const.Fonts.DEFAULT_FONT_SIZE;
         end
 
-        Utils.logDebug("[Utils.InitFontImgui] Added font " ..
-            fontInfo.FONT_NAME .. " with for setting " .. tostring(v) .. " with size " .. size);
-        local font = imgui.load_font(fontInfo.FONT_NAME, size, fontInfo.GLYPH_RANGES);
-        Utils.logDebug(type(font) .. " " .. tostring(font));
-        fonts[v] = font;
+        fontSizeSettings[v] = size;
     end
 
-    Utils.logDebug("[Utils.InitFontImgui] Cached font with key: " .. tostring(key));
-    cachedImguiFonts[key] = fonts;
+    cachedFontSettings[key] = fontSizeSettings;
 end
 
 -------------------------------------------------------------------
 
 function Utils.GetFontImgui(key, size)
-    local font = cachedImguiFonts[key];
-    if font ~= nil then
-        return font[size];
+    -- Loading big glyph sets (like CJK language fonts) in quick succession crashes the game.
+    -- Due to this we only cache the font once. Changing the size while the script is running will not be allowed. You have to use "Reset script"
+    if currentCachedFont.Font == nil then --or Utils.GetLanguage() ~= currentCachedFont.language or reqSize ~= currentCachedFont.size then
+        local FontSettings = cachedFontSettings[key];
+        if FontSettings == nil then return nil; end
+        local reqSize = FontSettings[size];
+        --Utils.logDebug("reqSize: " .. tostring(reqSize));
+        if reqSize == nil then
+            reqSize = Const.Fonts.DEFAULT_FONT_SIZE;
+        end;
+
+        local language = Utils.GetLanguage();
+        Utils.logDebug("[Utils.InitFontImgui] GetLanguage returned: " .. tostring(language));
+        local fontInfo = Const.Fonts[language];
+        if not fontInfo then
+            Utils.logDebug("Fallback");
+            fontInfo = Const.Fonts.Default;
+        end
+
+        currentCachedFont.Font = imgui.load_font(fontInfo.FONT_NAME, reqSize, fontInfo.GLYPH_RANGES);
+        currentCachedFont.language = language;
+        currentCachedFont.size = reqSize;
+        Utils.logDebug("[Utils.InitFontImgui] Added font " ..
+            fontInfo.FONT_NAME .. " with size " .. size .. " for language " .. language);
     end
 
-    return nil;
+    return currentCachedFont.Font;
 end
 
 -------------------------------------------------------------------

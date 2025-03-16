@@ -66,7 +66,7 @@ function SettingsMenu.Draw()
             [Const.Fonts.SIZES.LARGE] = "Large",
             [Const.Fonts.SIZES.HUGE] = "Huge"
         }
-        changed, Settings.current.text.size = imgui.combo("Graph Size", Settings.current.text.size, options);
+        changed, Settings.current.text.graphSize = imgui.combo("Graph Size", Settings.current.text.graphSize, options);
         settingsChanged = settingsChanged or changed;
 
         if imgui.tree_node("Auto Hide") then
@@ -203,9 +203,10 @@ function SettingsMenu.Draw()
             [Const.Fonts.SIZES.LARGE] = "Large",
             [Const.Fonts.SIZES.HUGE] = "Huge"
         }
-        changed, Settings.current.text.size = imgui.combo("Size",
-            Settings.current.text.size, options);
+        changed, Settings.current.text.trackerSize = imgui.combo("Font Size",
+            Settings.current.text.trackerSize, options);
         settingsChanged = settingsChanged or changed;
+        imgui.text_colored("Font size changes will only apply after using [Reset scripts]!", 0xFF0000FF);
 
         imgui.new_line();
 

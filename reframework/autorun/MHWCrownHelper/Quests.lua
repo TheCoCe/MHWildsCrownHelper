@@ -25,6 +25,7 @@ end
 function Quests.InitModule()
     Utils.Hook("app.EnemyManager", "evSceneLoadEnd_ThroughJunction", Quests.OnSceneLoadEndHook);
     Utils.Hook("app.EnemyManager", "evSceneLoadEnd_FastTravel", Quests.OnSceneLoadEndHook);
+    Utils.logDebug("Quests Initialized");
 end
 
 return Quests;

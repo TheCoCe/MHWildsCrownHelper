@@ -141,9 +141,9 @@ function Drawing.DrawText(text, posx, posy, color, drawShadow, shadowOffsetX, sh
         return;
     end
 
-    local font = Utils.GetFontD2D("regular", Settings.current.text.size);
+    local font = Utils.GetFontD2D("regular", Settings.current.text.graphSize);
     if font == nil then
-        Utils.logDebug("No font found for size " .. Settings.current.text.size);
+        Utils.logDebug("No font found for size " .. Settings.current.text.graphSize);
         return;
     end
 
@@ -185,9 +185,9 @@ function Drawing.DrawTextFont(text, font, posx, posy, color, drawShadow, shadowO
         return;
     end
 
-    if font == nil then font = Utils.GetFontD2D("regular", Settings.current.text.size); end
+    if font == nil then font = Utils.GetFontD2D("regular", Settings.current.text.graphSize); end
     if font == nil then
-        Utils.logDebug("No font found for size " .. Settings.current.text.size);
+        Utils.logDebug("No font found for size " .. Settings.current.text.graphSize);
         return;
     end
 
@@ -212,7 +212,7 @@ end
 ---@param text string
 ---@return number
 function Drawing.MeasureText(text)
-    local font = Utils.GetFontD2D("regular", Settings.current.text.size);
+    local font = Utils.GetFontD2D("regular", Settings.current.text.graphSize);
     if font then
         return font:measure(text);
     end
@@ -227,7 +227,7 @@ end
 ---@param font any|nil
 ---@return number
 function Drawing.MeasureTextWithFont(text, font)
-    if font == nil then font = Utils.GetFontD2D("regular", Settings.current.text.size); end
+    if font == nil then font = Utils.GetFontD2D("regular", Settings.current.text.graphSize); end
     if font then
         return font:measure(text);
     end

@@ -76,8 +76,9 @@ function Settings.Init()
         },
 
         text = {
-            size = Const.Fonts.SIZES.MEDIUM,
-            ntfySize = Const.Fonts.SIZES.MEDIUM
+            graphSize = Const.Fonts.SIZES.MEDIUM,
+            ntfySize = Const.Fonts.SIZES.MEDIUM,
+            trackerSize = Const.Fonts.SIZES.MEDIUM,
         }
     };
 end

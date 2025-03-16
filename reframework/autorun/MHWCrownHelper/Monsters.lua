@@ -434,6 +434,7 @@ function Monsters.InitModule()
     Monsters.InitEnemyTypesList();
     Monsters.InitSizeInfos();
     Quests.onLocationChanged:add(Monsters.OnLocationChangedCallback);
+    Utils.logDebug("Monsters Initialized");
 end
 
 -------------------------------------------------------------------
