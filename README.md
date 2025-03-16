@@ -31,6 +31,13 @@ If you need Chinese, Japanese or Korean font support, CrownHelper supports one t
 
 Fonts loaded by CrownHelper will be defined by the ingame text language setting and only update when reloading the script.
 
+## Optional Requirements
+If you need Chinese, Japanese or Korean font support, CrownHelper supports one of the following font packs.
+1. [Catlib optional FontPack by lingsamuel](https://www.nexusmods.com/monsterhunterwilds/mods/65?tab=files)
+2. [CJK Font Support by NekoNekoYukari](https://www.nexusmods.com/monsterhunterwilds/mods/159?tab=files)
+
+Fonts loaded by CrownHelper will be defined by the ingame text language setting.
+
 ## Installation
 1. Make sure you have REFramework installed [REFramework](https://github.com/praydog/REFramework)
 2. Make sure you have [Direct2D for REFramework](https://www.nexusmods.com/monsterhunterrise/mods/134) installed
