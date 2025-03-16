@@ -154,14 +154,12 @@ end
 -------------------------------------------------------------------
 
 function Utils.GetLanguage()
-    --[[ local optionUtil = sdk.find_type_definition("app.OptionUtil");
+    local optionUtil = sdk.find_type_definition("app.OptionUtil");
     local getLanguage = optionUtil:get_method("getTextLanguage()");
     local lang = getLanguage(nil);
     local languageDef = sdk.find_type_definition("app.LanguageDef");
     local covertLanguage = languageDef:get_method("convert(app.LanguageDef.LANGUAGE_APP)");
-    return covertLanguage(nil, lang); ]]
-    -- Specifically hardcoded traditional chinese for testing
-    return 12;
+    return covertLanguage(nil, lang);
 end
 
 -------------------------------------------------------------------
