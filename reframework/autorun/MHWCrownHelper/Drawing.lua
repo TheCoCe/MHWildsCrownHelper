@@ -26,6 +26,7 @@ function Drawing.Init()
         Drawing.InitImage(Const.CrownType.Small, "MiniCrown.png");
         Drawing.InitImage(Const.CrownType.Big, "BigCrown.png");
         Drawing.InitImage(Const.CrownType.King, "KingCrown.png");
+        Drawing.InitImage("obtained", "CrownObtained.png");
         Drawing.InitImage("small_gs", "MiniCrown_gs.png");
         Drawing.InitImage("big_gs", "BigCrown_gs.png");
         Drawing.InitImage("king_gs", "KingCrown_gs.png");
