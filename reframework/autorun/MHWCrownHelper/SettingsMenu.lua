@@ -199,6 +199,10 @@ function SettingsMenu.Draw()
             Settings.current.crownTracker.showSizeBorders);
         settingsChanged = settingsChanged or changed;
 
+        changed, Settings.current.crownTracker.ignoreSilverCrowns = imgui.checkbox("Show silver crowns",
+            Settings.current.crownTracker.ignoreSilverCrowns);
+        settingsChanged = settingsChanged or changed;
+
         local options = {
             [Const.Fonts.SIZES.TINY] = "Tiny",
             [Const.Fonts.SIZES.SMALL] = "Small",
@@ -219,6 +223,9 @@ function SettingsMenu.Draw()
 
         imgui.tree_pop();
     end
+
+    imgui.tree_pop();
+    imgui.new_line();
 
     --imgui.end_window();
 

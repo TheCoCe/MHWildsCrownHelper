@@ -134,9 +134,11 @@ function CrownTracker.DrawMonsterSizeTable()
                     imgui.text("X");
                 end
 
-                imgui.table_next_column();
-                if sizeDetails.bigCrownObtained then
-                    imgui.text("X");
+                if not Settings.current.crownTracker.ignoreSilverCrowns then
+                    imgui.table_next_column();
+                    if sizeDetails.bigCrownObtained then
+                        imgui.text("X");
+                    end
                 end
 
                 imgui.table_next_column();

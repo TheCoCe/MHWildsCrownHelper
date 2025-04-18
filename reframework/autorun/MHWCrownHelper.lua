@@ -86,7 +86,7 @@ end
 -- init stuff
 
 re.on_draw_ui(function()
-    if imgui.collapsing_header("MHW Crown Helper") then
+    if imgui.tree_node("MHW Crown Helper") then
         pcall(SettingsMenu.Draw);
     end
 end)

@@ -72,6 +72,7 @@ function Settings.Init()
             hideComplete = true,
             showSizeBorders = false,
             showCurrentRecords = false,
+            ignoreSilverCrowns = false,
             crownTrackerMode = Settings.CrownTrackerMode.ShowWithREFUI,
         },
 
