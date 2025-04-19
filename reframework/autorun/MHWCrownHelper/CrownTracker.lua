@@ -74,8 +74,9 @@ function CrownTracker.DrawCrownTracker()
         if imgui.begin_window("Monster Crown Tracker", CrownTracker.crownTableVisible, 1 << 14 | 1 << 16) then
             CrownTracker.DrawMonsterSizeTable();
             imgui.end_window();
-        else
+        elseif CrownTracker.crownTableVisible == true then
             CrownTracker.crownTableVisible = false;
+            imgui.end_window();
         end
     end
 
@@ -88,9 +89,9 @@ end
 
 ---Draws the monster size table in an imgui window.
 function CrownTracker.DrawMonsterSizeTable()
-    local tableSize = 4;
+    local tableSize = 3 + (Settings.current.crownTracker.ignoreSilverCrowns and 0 or 1);
     if Settings.current.crownTracker.showSizeBorders then
-        tableSize = tableSize + 3;
+        tableSize = tableSize + 2 + (Settings.current.crownTracker.ignoreSilverCrowns and 0 or 1);
     end
     if Settings.current.crownTracker.showCurrentRecords then
         tableSize = tableSize + 2;
@@ -99,7 +100,9 @@ function CrownTracker.DrawMonsterSizeTable()
     if imgui.begin_table("Monster Crown Tracker", tableSize, tableFlags) then
         imgui.table_setup_column("Monster");
         imgui.table_setup_column("M");
-        imgui.table_setup_column("S");
+        if not Settings.current.crownTracker.ignoreSilverCrowns then
+            imgui.table_setup_column("S");
+        end
         imgui.table_setup_column("G");
 
         if Settings.current.crownTracker.showCurrentRecords then
@@ -109,13 +112,17 @@ function CrownTracker.DrawMonsterSizeTable()
 
         if Settings.current.crownTracker.showSizeBorders then
             imgui.table_setup_column("Max Mini Size");
-            imgui.table_setup_column("Min Silver Size");
+            if not Settings.current.crownTracker.ignoreSilverCrowns then
+                imgui.table_setup_column("Min Silver Size");
+            end
             imgui.table_setup_column("Min Gold Size");
         end
 
         imgui.table_headers_row();
 
-        for _, v in pairs(Monsters.monsterDefinitions) do
+        for _, em in ipairs(Monsters.sortedKeysByName) do
+            local v = Monsters.monsterDefinitions[em];
+            if v == nil then goto continue end;
             if not v.isBoss then goto continue end;
             local sizeDetails = Monsters.GetSizeInfoForEnemyType(v.emType);
 
@@ -158,8 +165,10 @@ function CrownTracker.DrawMonsterSizeTable()
                     imgui.table_next_column();
                     imgui.text(string.format("%.2f", (sizeDetails.smallBorder / 100) * sizeDetails.baseSize));
 
-                    imgui.table_next_column();
-                    imgui.text(string.format("%.2f", (sizeDetails.bigBorder / 100) * sizeDetails.baseSize));
+                    if not Settings.current.crownTracker.ignoreSilverCrowns then
+                        imgui.table_next_column();
+                        imgui.text(string.format("%.2f", (sizeDetails.bigBorder / 100) * sizeDetails.baseSize));
+                    end
 
                     imgui.table_next_column();
                     imgui.text(string.format("%.2f", (sizeDetails.kingBorder / 100) * sizeDetails.baseSize));

@@ -199,7 +199,7 @@ function SettingsMenu.Draw()
             Settings.current.crownTracker.showSizeBorders);
         settingsChanged = settingsChanged or changed;
 
-        changed, Settings.current.crownTracker.ignoreSilverCrowns = imgui.checkbox("Show silver crowns",
+        changed, Settings.current.crownTracker.ignoreSilverCrowns = imgui.checkbox("Ignore silver crowns",
             Settings.current.crownTracker.ignoreSilverCrowns);
         settingsChanged = settingsChanged or changed;
 

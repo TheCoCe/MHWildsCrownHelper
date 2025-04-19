@@ -46,6 +46,7 @@ local IsZakoID                   = sdk.find_type_definition("app.EnemyDef"):get_
 Monsters.monsters                = {};
 -- All available monster types k[emType], v[table]
 Monsters.monsterDefinitions      = {};
+Monsters.sortedKeysByName        = {};
 
 Monsters.UpdateInterval          = 5.0;
 local nextRemovalUpdate          = 0.0;
@@ -328,8 +329,13 @@ function Monsters.InitEnemyTypesList()
                 isFish = IDToIsFish(nil, EmID),
                 isZako = IsZakoID(nil, EmID),
             };
+            table.insert(Monsters.sortedKeysByName, EmID);
         end
     end
+
+    table.sort(Monsters.sortedKeysByName, function(a, b)
+        return Monsters.monsterDefinitions[a].name < Monsters.monsterDefinitions[b].name;
+    end)
 end
 
 -------------------------------------------------------------------
